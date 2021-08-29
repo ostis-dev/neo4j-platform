@@ -1,0 +1,5 @@
+[db]
+name = db_name
+uri = bolt://localhost:7687
+user = login
+password = pass
