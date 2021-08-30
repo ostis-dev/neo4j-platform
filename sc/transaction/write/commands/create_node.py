@@ -1,5 +1,5 @@
 from typing import overload
-from sc.commands.command import Command
+from sc.transaction.write.commands.base import Command
 
 class CreateNodeCommand(Command):
   

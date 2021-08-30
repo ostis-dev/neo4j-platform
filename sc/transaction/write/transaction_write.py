@@ -3,7 +3,7 @@ from typing import Union
 import neo4j
 from neo4j.exceptions import TransactionError
 
-from sc.commands import CreateNodeCommand
+from sc.transaction.write.commands import CreateNodeCommand
 
 class TransactionResult:
   def __init__(self, values: dict, result_summary: neo4j.ResultSummary):
@@ -13,7 +13,13 @@ class TransactionResult:
 
   def __getitem__(self, alias):
     return self.values[alias]
-  
+
+  def __repr__(self) -> str:
+    return "values_num: {}, run_time: {} ms, consume_time: {} ms".format(
+      len(self.values.keys()),
+      self.run_time,
+      self.consume_time
+    )
 
 class TransactionWrite:
 
@@ -49,7 +55,7 @@ class TransactionWrite:
     with self.driver.session() as session:
       return session.write_transaction(TransactionWrite._run_impl, query)
 
-  @neo4j.unit_of_work(timeout=5)
+  @neo4j.unit_of_work(timeout=30)
   def _run_impl(tx: neo4j.Transaction, query):
     try:
       query_res = tx.run(query)
