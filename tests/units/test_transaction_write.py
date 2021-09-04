@@ -131,3 +131,15 @@ class TestConnect(MemoryTestCase):
 
     self.assertIsNotNone(result)
     self.assertEqual(len(result), 5)
+
+  def test_links(self):
+    tr = self.memory.create_write_transaction()
+    link_int = tr.create_link_with_content("link_int", 5)
+    link_float = tr.create_link_with_content("link_float", 7.89)
+    link_str = tr.create_link_with_content("link_str", "string_content")
+    link_url = tr.create_link_with_content("link_url", "http://test.test")
+
+    result = tr.run()
+
+    self.assertIsNotNone(result)
+    self.assertEqual(len(result), 4)
