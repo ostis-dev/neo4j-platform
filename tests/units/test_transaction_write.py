@@ -39,7 +39,7 @@ class TestConnect(MemoryTestCase):
     self.assertTrue("alias2" in result.values)
 
   def test_create_nodes_large(self):
-    nodes_num = 100
+    nodes_num = 1000
     tr = self.memory.create_write_transaction()
     for i in range(nodes_num):
       tr.create_node("alias_{}".format(i))
@@ -73,8 +73,8 @@ class TestConnect(MemoryTestCase):
     src = result["src"]
     trg = result["trg"]
 
-    self.assertTrue(isinstance(src, int))
-    self.assertTrue(isinstance(trg, int))
+    self.assertTrue(isinstance(src, sc.ElementID))
+    self.assertTrue(isinstance(trg, sc.ElementID))
 
     tr = self.memory.create_write_transaction()
     tr.create_edge(src, trg, "edge")
@@ -91,7 +91,7 @@ class TestConnect(MemoryTestCase):
     src = result["src"]
 
     self.assertIsNotNone(result)
-    self.assertTrue(isinstance(src, int))
+    self.assertTrue(isinstance(src, sc.ElementID))
 
     tr = self.memory.create_write_transaction()
     trg = tr.create_node()
@@ -109,7 +109,7 @@ class TestConnect(MemoryTestCase):
     trg = result["trg"]
 
     self.assertIsNotNone(result)
-    self.assertTrue(isinstance(trg, int))
+    self.assertTrue(isinstance(trg, sc.ElementID))
 
     tr = self.memory.create_write_transaction()
     src = tr.create_node()

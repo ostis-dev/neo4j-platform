@@ -1,4 +1,5 @@
 from logging import NullHandler
+from sc.types import ElementID
 from typing import Union
 
 import neo4j
@@ -33,50 +34,48 @@ class TransactionWrite:
     self._nodes_to_create = []
     self._edges_to_create = []
     self._links_to_create = []
-    self._results = []
+    self._results = {}
 
   def _next_id(self):
     self._id_counter += 1
     return self._id_counter
 
-  def _process_alias(self, alias, prefix = "el"):
+  def _process_alias(self, alias: str, label: str, prefix = "el"):
     if alias is None:
       return f"{prefix}_{self._next_id()}"
     
     if alias in self._results:
       raise KeyError(f"Alias {alias} already exist")
 
-    self._results.append(alias)
+    self._results[alias] = label
     return alias
 
   def create_node(self, alias = None) -> str:
-    alias = self._process_alias(alias, prefix="node")
+    alias = self._process_alias(alias, "sc_node", prefix="node")
     self._nodes_to_create.append((alias, "sc_node"))
     return alias
 
   def create_link_with_content(self, alias: str = None, content: Union[str, int, float] = None, is_url: bool = False):
-    alias = self._process_alias(alias, prefix="link")
+    alias = self._process_alias(alias, "sc_link", prefix="link")
     self._links_to_create.append((alias, "sc_link", is_url, content))
     return alias
 
-  def _resolve_alias_by_id(self, id):
-    assert isinstance(id, int)
+  def _resolve_alias_by_element_id(self, el_id):
+    assert isinstance(el_id, ElementID)
     try:
-      return self._id_to_alias[id]
+      return self._id_to_alias[el_id.full_id]
     except KeyError:
       alias = f"el_{self._next_id()}"
-      self._id_to_alias[id] = alias
+      self._id_to_alias[el_id.full_id] = (alias, el_id)
       return alias
 
-  def create_edge(self, src: Union[str, int], trg: Union[str, int], alias = None) -> str:
-    alias = self._process_alias(alias, prefix="edge")
-    self._nodes_to_create.append((alias, "sc_edge"))
+  def create_edge(self, src: Union[str, ElementID], trg: Union[str, ElementID], alias = None) -> str:
+    alias = self._process_alias(alias, "sc_edge", prefix="edge")
 
-    src_alias = src if isinstance(src, str) else self._resolve_alias_by_id(src)
-    trg_alias = trg if isinstance(trg, str) else self._resolve_alias_by_id(trg)
+    src_alias = src if isinstance(src, str) else self._resolve_alias_by_element_id(src)
+    trg_alias = trg if isinstance(trg, str) else self._resolve_alias_by_element_id(trg)
 
-    self._edges_to_create.append((alias, src_alias, "sc_connect_src"))
-    self._edges_to_create.append((alias, trg_alias, "sc_connect_trg"))
+    self._edges_to_create.append((alias, src_alias, trg_alias, "sc_edge"))
 
     return alias
 
@@ -86,15 +85,15 @@ class TransactionWrite:
     # resolve nodes
     if len(self._id_to_alias) > 0:
       query += "MATCH "
-      query += ", ".join([f"({alias})" for alias in self._id_to_alias.values()])
+      query += ", ".join([f"({v[0]}:{v[1].label})" for v in self._id_to_alias.values()])
       query += "\nWHERE "
-      query += " AND ".join([f"id({alias})={id}" for id, alias in self._id_to_alias.items()])
+      query += " AND ".join([f"id({value[0]})={value[1].id}" for id, value in self._id_to_alias.items()])
 
     # create nodes and edges
     create_nodes = ", ".join([f"({alias}:{label})" for alias, label in self._nodes_to_create])
 
     create_edges = ", ".join([
-      f"({src_alias})-[:{label}]->({trg_alias})" for src_alias, trg_alias, label in self._edges_to_create
+      f"({src_alias})-[_rel_{alias}:{label}]->({trg_alias})" for alias, src_alias, trg_alias, label in self._edges_to_create
       ])
 
     # create links  
@@ -131,12 +130,25 @@ class TransactionWrite:
         create_params += ","
       create_params += create_links
 
-
     if len(create_params) > 0:
       query += "\nCREATE " + create_params
 
+    # create sockets
+    if len(create_edges) > 0:
+      def _build_alias(item):
+        alias, label = item
+        if label == "sc_edge":
+          return f"_rel_{alias}"
+        
+        return alias
+        
+      # build with command
+      with_values = "\nWITH " + ", ".join(map(lambda r: f"{_build_alias(r)}", self._results.items()))
+      query += with_values
+      query += "\nCREATE " + ", ".join(map(lambda edge: f"({edge[0]}:sc_edge_proxy {{edge_id: id(_rel_{edge[0]})}})", self._edges_to_create))
+
     if len(self._results) > 0:
-      query += "\nRETURN " + ",".join(map(lambda r: "id({}) as {}".format(r, r), self._results))
+      query += "\nRETURN " + ",".join(map(lambda r: f"id({r}) as {r}", self._results.keys()))
     else:
       query += "\nRETURN null"
 
@@ -150,17 +162,15 @@ class TransactionWrite:
     )
 
   def run(self) -> TransactionResult:
-
     if self._is_empty():
       return None
     
     query = self._make_query()
-
     with self.driver.session() as session:
-      return session.write_transaction(TransactionWrite._run_impl, query)
+      return session.write_transaction(TransactionWrite._run_impl, query, self._results)
 
   @neo4j.unit_of_work(timeout=30)
-  def _run_impl(tx: neo4j.Transaction, query):
+  def _run_impl(tx: neo4j.Transaction, query, labels):
     try:
       query_res = tx.run(query)
     except TransactionError:
@@ -173,7 +183,7 @@ class TransactionWrite:
         if key == "null":
           continue
 
-        values[key] = int(value)
+        values[key] = ElementID(labels[key], value)
 
     info = query_res.consume()
     result = TransactionResult(values=values, result_summary=info)
