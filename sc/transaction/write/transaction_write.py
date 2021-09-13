@@ -91,6 +91,7 @@ class TransactionWrite:
 
     # create nodes and edges
     create_nodes = ", ".join([f"({alias}:{label})" for alias, label in self._nodes_to_create])
+    create_sockets = ", ".join([f"({v[0]}:sc_edge_socket)" for v in self._edges_to_create])
 
     create_edges = ", ".join([
       f"({src_alias})-[_rel_{alias}:{label}]->({trg_alias})" for alias, src_alias, trg_alias, label in self._edges_to_create
@@ -123,7 +124,7 @@ class TransactionWrite:
     if len(create_edges) > 0:
       if len(create_params) > 0:
         create_params += ", "
-      create_params += create_edges
+      create_params += create_sockets + ", " + create_edges
 
     if len(create_links) > 0:
       if len(create_params) > 0:
@@ -135,17 +136,17 @@ class TransactionWrite:
 
     # create sockets
     if len(create_edges) > 0:
-      def _build_alias(item):
+      def _build_edge_aliases(item):
         alias, label = item
         if label == "sc_edge":
-          return f"_rel_{alias}"
+          return f"_rel_{alias}, {alias}"
         
         return alias
         
       # build with command
-      with_values = "\nWITH " + ", ".join(map(lambda r: f"{_build_alias(r)}", self._results.items()))
+      with_values = "\nWITH " + ", ".join(map(lambda r: f"{_build_edge_aliases(r)}", self._results.items()))
       query += with_values
-      query += "\nCREATE " + ", ".join(map(lambda edge: f"({edge[0]}:sc_edge_proxy {{edge_id: id(_rel_{edge[0]})}})", self._edges_to_create))
+      query += "\nSET " + ", ".join(map(lambda edge: f"{edge[0]}.edge_id = id(_rel_{edge[0]})", self._edges_to_create))
 
     if len(self._results) > 0:
       query += "\nRETURN " + ",".join(map(lambda r: f"id({r}) as {r}", self._results.keys()))

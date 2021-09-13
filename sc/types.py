@@ -21,3 +21,6 @@ class ElementID:
   @property
   def label(self):
     return self._label
+
+  def __repr__(self) -> str:
+    return f"ElementID({self.full_id})"
