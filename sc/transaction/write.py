@@ -1,11 +1,11 @@
-from logging import NullHandler
 from sc.types import ElementID
 from typing import Union
 
 import neo4j
 from neo4j.exceptions import TransactionError
 
-class TransactionResult:
+class TransactionWriteResult:
+
   def __init__(self, values: dict, result_summary: neo4j.ResultSummary):
     self.values = values
     self.run_time = result_summary.result_available_after
@@ -34,6 +34,7 @@ class TransactionWrite:
     self._nodes_to_create = []
     self._edges_to_create = []
     self._links_to_create = []
+    self._edge_aliases = set()
     self._results = {}
 
   def _next_id(self):
@@ -69,13 +70,15 @@ class TransactionWrite:
       self._id_to_alias[el_id.full_id] = (alias, el_id)
       return alias
 
-  def create_edge(self, src: Union[str, ElementID], trg: Union[str, ElementID], alias = None) -> str:
+  def create_edge(self, src: Union[str, ElementID], trg: Union[str, ElementID], edge_label: str, alias: str = None) -> str:
+    assert edge_label is not None
     alias = self._process_alias(alias, "sc_edge", prefix="edge")
 
     src_alias = src if isinstance(src, str) else self._resolve_alias_by_element_id(src)
     trg_alias = trg if isinstance(trg, str) else self._resolve_alias_by_element_id(trg)
 
     self._edges_to_create.append((alias, src_alias, trg_alias, "sc_edge"))
+    self._edge_aliases.add(alias)
 
     return alias
 
@@ -91,10 +94,15 @@ class TransactionWrite:
 
     # create nodes and edges
     create_nodes = ", ".join([f"({alias}:{label})" for alias, label in self._nodes_to_create])
-    create_sockets = ", ".join([f"({v[0]}:sc_edge_socket)" for v in self._edges_to_create])
+    create_sockets = ", ".join([f"({v[0]}_sock:sc_edge_socket)" for v in self._edges_to_create])
+
+    def _process_edge_alias(alias):
+      if alias in self._edge_aliases:
+        return f'{alias}_sock'
+      return alias
 
     create_edges = ", ".join([
-      f"({src_alias})-[_rel_{alias}:{label}]->({trg_alias})" for alias, src_alias, trg_alias, label in self._edges_to_create
+      f"({_process_edge_alias(src_alias)})-[{alias}:{label}]->({_process_edge_alias(trg_alias)})" for alias, src_alias, trg_alias, label in self._edges_to_create
       ])
 
     # create links  
@@ -139,17 +147,17 @@ class TransactionWrite:
       def _build_edge_aliases(item):
         alias, label = item
         if label == "sc_edge":
-          return f"_rel_{alias}, {alias}"
+          return f"{alias}_sock, {alias}"
         
         return alias
         
       # build with command
       with_values = "\nWITH " + ", ".join(map(lambda r: f"{_build_edge_aliases(r)}", self._results.items()))
       query += with_values
-      query += "\nSET " + ", ".join(map(lambda edge: f"{edge[0]}.edge_id = id(_rel_{edge[0]})", self._edges_to_create))
+      query += "\nSET " + ", ".join(map(lambda edge: f"{edge[0]}_sock.edge_id = id({edge[0]})", self._edges_to_create))
 
     if len(self._results) > 0:
-      query += "\nRETURN " + ",".join(map(lambda r: f"id({r}) as {r}", self._results.keys()))
+      query += "\nRETURN " + ", ".join(map(lambda r: f"id({r}) as {r}", self._results.keys()))
     else:
       query += "\nRETURN null"
 
@@ -162,16 +170,17 @@ class TransactionWrite:
       len(self._links_to_create) == 0
     )
 
-  def run(self) -> TransactionResult:
+  def run(self) -> TransactionWriteResult:
     if self._is_empty():
       return None
     
     query = self._make_query()
+    # print (query)
     with self.driver.session() as session:
       return session.write_transaction(TransactionWrite._run_impl, query, self._results)
 
   @neo4j.unit_of_work(timeout=30)
-  def _run_impl(tx: neo4j.Transaction, query, labels):
+  def _run_impl(tx: neo4j.Transaction, query, results):
     try:
       query_res = tx.run(query)
     except TransactionError:
@@ -184,9 +193,9 @@ class TransactionWrite:
         if key == "null":
           continue
 
-        values[key] = ElementID(labels[key], value)
+        values[key] = ElementID(results[key], value)
 
     info = query_res.consume()
-    result = TransactionResult(values=values, result_summary=info)
+    result = TransactionWriteResult(values=values, result_summary=info)
 
     return result

@@ -10,6 +10,12 @@ class ElementID:
     self._label = label
     self._id = id
 
+  def __eq__(self, o: object) -> bool:
+    return self._id == o._id and self._label == o._label
+
+  def __ne__(self, o: object) -> bool:
+    return self._id != o.id or self._label != o._label
+
   @property
   def full_id(self):
     return str(self._id) + ":" + self._label

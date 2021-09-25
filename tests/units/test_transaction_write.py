@@ -2,7 +2,7 @@ from unittest import result
 import sc
 from tests.memory_case import MemoryTestCase
 
-class TestConnect(MemoryTestCase):
+class TestCommon(MemoryTestCase):
 
   def test_duplicate_alias(self):
     tr = self.memory.create_write_transaction()
@@ -17,7 +17,9 @@ class TestConnect(MemoryTestCase):
 
     self.assertIsNotNone(result)
 
-  def test_create_node_dummy(self):
+class TestNodes(MemoryTestCase):
+
+  def create_node_dummy(self):
     tr = self.memory.create_write_transaction()
     name = tr.create_node("alias")
     result = tr.run()
@@ -51,11 +53,13 @@ class TestConnect(MemoryTestCase):
     for i in range(nodes_num):
       self.assertTrue("alias_{}".format(i) in result.values)
 
+class TestEdges(MemoryTestCase):
+
   def test_create_edge_dummy(self):
     tr = self.memory.create_write_transaction()
     src = tr.create_node()
     trg = tr.create_node()
-    tr.create_edge(src, trg, "edge")
+    tr.create_edge(src, trg, "sc_edge", "edge")
 
     result = tr.run()
     self.assertIsNotNone(result)
@@ -77,7 +81,7 @@ class TestConnect(MemoryTestCase):
     self.assertTrue(isinstance(trg, sc.ElementID))
 
     tr = self.memory.create_write_transaction()
-    tr.create_edge(src, trg, "edge")
+    tr.create_edge(src, trg, "sc_edge", "edge")
     result = tr.run()
 
     self.assertIsNotNone(result)
@@ -95,7 +99,7 @@ class TestConnect(MemoryTestCase):
 
     tr = self.memory.create_write_transaction()
     trg = tr.create_node()
-    tr.create_edge(src, trg, "edge")
+    tr.create_edge(src, trg, "sc_edge", "edge")
     result = tr.run()
 
     self.assertIsNotNone(result)
@@ -113,7 +117,7 @@ class TestConnect(MemoryTestCase):
 
     tr = self.memory.create_write_transaction()
     src = tr.create_node()
-    tr.create_edge(src, trg, "edge")
+    tr.create_edge(src, trg, "sc_edge", "edge")
     result = tr.run()
 
     self.assertIsNotNone(result)
@@ -124,9 +128,9 @@ class TestConnect(MemoryTestCase):
     attr = tr.create_node("attr")
     src = tr.create_node("src")
     trg = tr.create_node("trg")
-    edge = tr.create_edge(src, trg, "edge")
+    edge = tr.create_edge(src, trg, "sc_edge", "edge")
     
-    tr.create_edge(attr, edge, "edge_attr")
+    tr.create_edge(attr, edge, "sc_edge", "edge_attr")
     result = tr.run()
 
     self.assertIsNotNone(result)

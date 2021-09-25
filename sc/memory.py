@@ -1,6 +1,6 @@
 from sc.client import Client
 from sc.config import Config
-from sc.transaction import TransactionWrite
+from sc.transaction import TransactionWrite, TransactionRead
 
 class Memory:
   
@@ -16,3 +16,6 @@ class Memory:
 
   def create_write_transaction(self) -> TransactionWrite:
     return TransactionWrite(self.client.driver)
+
+  def create_read_transaction(self) -> TransactionRead:
+    return TransactionRead(self.client.driver)
