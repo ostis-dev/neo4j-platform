@@ -1,9 +1,10 @@
+import neo4j
+
 from sc.types import ElementID
+from sc.labels import Labels
+
 from enum import Enum
 from typing import Union, Tuple
-
-import neo4j
-from neo4j.exceptions import TransactionError
 
 class FixedParameter:
 
@@ -229,12 +230,12 @@ class TransactionRead:
       if isinstance(p, tuple):
         if p[0] in self._edges:
           required_sockets.add(p[0])
-          return (f'{p[0]}_sock:sc_edge_socket', p[1])
+          return (f'{p[0]}_sock:{Labels.SC_EDGE_SOCK}', p[1])
         return p
       
       if p in self._edges:
         required_sockets.add(p)
-        return f'{p}_sock:sc_edge_socket'
+        return f'{p}_sock:{Labels.SC_EDGE_SOCK}'
 
       return p
 
@@ -264,7 +265,6 @@ class TransactionRead:
     return_section = "\nRETURN "
     if len(self._result) > 0:
       return_section += ", ".join(map(lambda r: f'{r}', self._result))
-      # return_section += ", ".join(map(lambda r: f'{{id: id({r}), label: labels({r})[0]}} as {r}', self._result))
     else:
       return_section += " null"
 
@@ -287,7 +287,7 @@ class TransactionRead:
   def _run_impl(tx: neo4j.Transaction, query, result_aliases):
     try:
       query_res = tx.run(query)
-    except TransactionError:
+    except neo4j.exceptions.DriverError:
       return None
 
     result_items = []

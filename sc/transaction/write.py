@@ -1,8 +1,9 @@
 from sc.types import ElementID
 from typing import Union
 
+from sc.labels import Labels
+
 import neo4j
-from neo4j.exceptions import TransactionError
 
 class TransactionWriteResult:
 
@@ -52,13 +53,13 @@ class TransactionWrite:
     return alias
 
   def create_node(self, alias = None) -> str:
-    alias = self._process_alias(alias, "sc_node", prefix="node")
-    self._nodes_to_create.append((alias, "sc_node"))
+    alias = self._process_alias(alias, Labels.SC_NODE, prefix="node")
+    self._nodes_to_create.append((alias, Labels.SC_NODE))
     return alias
 
   def create_link_with_content(self, alias: str = None, content: Union[str, int, float] = None, is_url: bool = False):
-    alias = self._process_alias(alias, "sc_link", prefix="link")
-    self._links_to_create.append((alias, "sc_link", is_url, content))
+    alias = self._process_alias(alias, Labels.SC_LINK, prefix="link")
+    self._links_to_create.append((alias, Labels.SC_LINK, is_url, content))
     return alias
 
   def _resolve_alias_by_element_id(self, el_id):
@@ -72,12 +73,12 @@ class TransactionWrite:
 
   def create_edge(self, src: Union[str, ElementID], trg: Union[str, ElementID], edge_label: str, alias: str = None) -> str:
     assert edge_label is not None
-    alias = self._process_alias(alias, "sc_edge", prefix="edge")
+    alias = self._process_alias(alias, Labels.SC_EDGE, prefix="edge")
 
     src_alias = src if isinstance(src, str) else self._resolve_alias_by_element_id(src)
     trg_alias = trg if isinstance(trg, str) else self._resolve_alias_by_element_id(trg)
 
-    self._edges_to_create.append((alias, src_alias, trg_alias, "sc_edge"))
+    self._edges_to_create.append((alias, src_alias, trg_alias, Labels.SC_EDGE))
     self._edge_aliases.add(alias)
 
     return alias
@@ -94,7 +95,7 @@ class TransactionWrite:
 
     # create nodes and edges
     create_nodes = ", ".join([f"({alias}:{label})" for alias, label in self._nodes_to_create])
-    create_sockets = ", ".join([f"({v[0]}_sock:sc_edge_socket)" for v in self._edges_to_create])
+    create_sockets = ", ".join([f"({v[0]}_sock:{Labels.SC_EDGE_SOCK})" for v in self._edges_to_create])
 
     def _process_edge_alias(alias):
       if alias in self._edge_aliases:
@@ -183,7 +184,7 @@ class TransactionWrite:
   def _run_impl(tx: neo4j.Transaction, query, results):
     try:
       query_res = tx.run(query)
-    except TransactionError:
+    except neo4j.exceptions.DriverError:
       return None
 
     values = {}
