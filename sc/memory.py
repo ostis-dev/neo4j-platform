@@ -1,3 +1,4 @@
+from sc.transaction.names import TransactionNamesWrite
 from sc.client import Client
 from sc.config import Config
 from sc.transaction import TransactionWrite, TransactionRead
@@ -19,3 +20,6 @@ class Memory:
 
   def create_read_transaction(self) -> TransactionRead:
     return TransactionRead(self.client.driver)
+
+  def create_name_write_transaction(self) -> TransactionNamesWrite:
+    return TransactionNamesWrite(self.client.driver)

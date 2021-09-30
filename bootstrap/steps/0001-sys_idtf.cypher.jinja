@@ -1,0 +1,9 @@
+CREATE 
+  (link:{{Labels.SC_LINK}} {content: "{{Keynodes.NREL_SYS_IDTF}}", is_url: false, type: "str"}),
+  (node:{{Labels.SC_NODE}}),
+  (node)-[edge:{{Labels.SC_EDGE}}]->(link)
+WITH edge, node
+CREATE
+  (edge_sock:{{Labels.SC_EDGE_SOCK}} {edge_id: id(edge)}),
+  (node)-[:{{Labels.SC_EDGE}}]->(edge_sock)
+RETURN null

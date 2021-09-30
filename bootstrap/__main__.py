@@ -6,13 +6,16 @@ import os
 from bootstrap.step import Step
 from termcolor import colored
 
+import jinja2
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-def collect_steps() -> List[Tuple[str, str]]:
+def collect_steps(dir_path: str) -> List[Tuple[str, str]]:
   collected = []
-  for root, _, files in os.walk(os.path.join(current_dir, "steps"), topdown=False):
-   for name in files:
-     collected.append((name, os.path.join(root, name)))
+  for root, _, files in os.walk(dir_path, topdown=False):
+    for name in files:
+      if root == dir_path:
+        collected.append((name, os.path.join(root, name)))
 
   return collected
 
@@ -20,17 +23,22 @@ def run(args):
   memory = sc.Memory(args.config)
   driver = memory.client.driver
 
+  dir_path = os.path.join(current_dir, "steps")
   print("Collecting steps ... ", end='')
-  steps = collect_steps()
+  steps = collect_steps(dir_path)
   print(colored(f"{len(steps)}", "white"))
   
   sorted_steps = sorted(steps, key=lambda x: x[0])
+
+  env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(dir_path),
+    autoescape=jinja2.select_autoescape())
 
   total_time = 0
 
   passed = True
   for name, file_name in sorted_steps:
-    step = Step(driver, file_name, memory.config)
+    step = Step(driver, env.get_template(name), memory.config)
 
     print("Run " + colored(name, "blue") + " ... ", end='')
     res = step.run()
