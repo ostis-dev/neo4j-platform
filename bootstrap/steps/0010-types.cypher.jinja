@@ -1,10 +1,17 @@
 {% import 'lib/names.cypher.jinja' as names %}
 
+{% set keynodes_list = [
+  'sc_const', 'sc_var',
+  'sc_node_struct', 'sc_node_tuple', 'sc_node_role', 'sc_node_no_role', 'sc_node_class', 'sc_node_abstract', 'sc_node_material',
+  'sc_edge_perm', 'sc_edge_temp',
+  'sc_edge_pos', 'sc_edge_neg', 'sc_edge_fuz'
+  ]%}
+
 {# find system identifier keynode #}
 {{ names.find_sys_idtf_rel(found_name="found_nrel_sys_idtf", Keynodes=Keynodes, Labels=Labels) }}
 WITH found_nrel_sys_idtf
 
-{% for keynode in ['sc_const', 'sc_var', 'sc_edge_perm', 'sc_edge_temp', 'sc_edge_pos', 'sc_edge_neg', 'sc_edge_fuz'] %}
+{% for keynode in keynodes_list %}
 CREATE (key_{{keynode}}:{{Labels.SC_NODE}})
 WITH key_{{keynode}}, found_nrel_sys_idtf
 {{ names.set_sys_idtf(node="key_" + keynode, idtf=keynode, rel_node="found_nrel_sys_idtf", Labels=Labels) }}
