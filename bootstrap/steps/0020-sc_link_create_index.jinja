@@ -1,1 +1,1 @@
-CREATE INDEX sc_link_index_content IF NOT EXISTS FOR (link:{{Labels.SC_LINK}}) ON (link.content)
+CREATE BTREE INDEX sc_link_index_content IF NOT EXISTS FOR (link:{{Labels.SC_LINK}}) ON (link.content)
