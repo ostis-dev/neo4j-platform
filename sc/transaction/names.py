@@ -145,12 +145,13 @@ class TransactionNamesRead:
 
     with_values = ["__sys_idtf"]
     for idtf in self._sys_idtfs:
-      with_values.append(idtf)
-      query += (f"OPTIONAL MATCH ({idtf}_link:{Labels.SC_LINK} {{content: '{idtf}'}})<-[{idtf}_edge:{Labels.SC_EDGE}]-({idtf}),\n"
-                f"(:{Labels.SC_EDGE_SOCK} {{edge_id: id({idtf}_edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n"
-                f"WITH {', '.join(with_values)}\n")
+      if len(with_values) > 1:
+        query += "UNION\n"
 
-    query += "RETURN " + ", ".join(map(lambda r: f"{r}", self._sys_idtfs))
+      with_values.append(idtf)
+      query += (f"MATCH (link:{Labels.SC_LINK} {{content: '{idtf}'}}), ({idtf})-[edge:{Labels.SC_EDGE}]->(link),\n"
+                f"(__sys_idtf)-[:{Labels.SC_EDGE}]->(:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})\n"
+                f"RETURN '{idtf}' as idtf, {idtf} as el\n")
 
     return query
 
@@ -170,17 +171,15 @@ class TransactionNamesRead:
       return None
 
     values = {}
-    for ix, record in enumerate(query_res):
-      assert ix == 0
-      for key, value in record.items():
-        if key == "null":
-          continue
-      
-        if isinstance(value, neo4j.graph.Relationship):
-          values[key] = ElementID(value.type, value.id)  
-        elif isinstance(value, neo4j.graph.Node):
-          label, = value.labels
-          values[key] = ElementID(label, value.id)
+    for _, record in enumerate(query_res):
+      key = record["idtf"]
+      value = record["el"]
+
+      if isinstance(value, neo4j.graph.Relationship):
+        values[key] = ElementID(value.type, value.id)
+      elif isinstance(value, neo4j.graph.Node):
+        label, = value.labels
+        values[key] = ElementID(label, value.id)
 
     info = query_res.consume()
 

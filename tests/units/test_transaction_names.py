@@ -85,7 +85,7 @@ class TestNames(MemoryTestCase):
 
   def test_sys_idtf_large(self):
 
-    test_num = 20
+    test_num = 50
 
     nodes = {}
     tr = self.memory.create_write_transaction()
