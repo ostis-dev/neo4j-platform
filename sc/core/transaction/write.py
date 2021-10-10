@@ -1,7 +1,7 @@
-from sc.types import ElementID
-from typing import Union
+from sc.core.types import ElementID
+from sc.core.labels import Labels
 
-from sc.labels import Labels
+from typing import Union
 
 import neo4j
 

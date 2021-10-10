@@ -1,9 +1,9 @@
 import jinja2
 import neo4j
 
-from sc.labels import Labels
-from sc.keynodes import Keynodes
-from sc.config import Config
+from sc.core.labels import Labels
+from sc.core.keynodes import Keynodes
+from sc.core.config import Config
 
 from typing import Union
 

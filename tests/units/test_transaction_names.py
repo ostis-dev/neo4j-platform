@@ -1,7 +1,7 @@
-from sc.transaction.names import TransactionNamesWrite
 from unittest import result
-import sc
 from tests.memory_case import MemoryTestCase
+
+from sc.core.transaction.names import TransactionNamesWrite
 
 class TestNames(MemoryTestCase):
 
@@ -110,8 +110,6 @@ class TestNames(MemoryTestCase):
     result = tr.run()
     self.assertIsNotNone(result)
 
-    print ('Set', result)
-
     tr = self.memory.create_name_read_transaction()
     for idtf in nodes.keys():
       tr.resolve_by_system_identifier(idtf)
@@ -120,11 +118,4 @@ class TestNames(MemoryTestCase):
     self.assertEqual(len(result), test_num)
     for idtf, el in nodes.items():
       self.assertEqual(result[idtf], el)
-
-    print ('Resolve', result)
-
-    
-
-
-    
     

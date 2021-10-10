@@ -1,7 +1,6 @@
-from sc import labels
-from sc.types import ElementID
-from sc.keynodes import Keynodes
-from sc.labels import Labels
+from sc.core.types import ElementID
+from sc.core.keynodes import Keynodes
+from sc.core.labels import Labels
 
 import neo4j
 
@@ -76,7 +75,7 @@ class TransactionNamesWrite:
     assert  not self._is_empty()
 
     query = self._make_query()
-    print (query)
+    # print (query)
     with self._driver.session() as session:
       return session.write_transaction(TransactionNamesWrite._run_impl, query)
 

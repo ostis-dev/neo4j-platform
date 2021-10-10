@@ -1,7 +1,7 @@
-from sc.transaction.read import AssignParameter, FixedParameter
 from unittest import result
-import sc
 from tests.memory_case import MemoryTestCase
+
+from sc.core.transaction.read import AssignParameter, FixedParameter
 
 class TestFindTemplate(MemoryTestCase):
 

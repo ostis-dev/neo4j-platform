@@ -1,7 +1,7 @@
-from sc.transaction.names import TransactionNamesWrite, TransactionNamesRead
-from sc.client import Client
-from sc.config import Config
-from sc.transaction import TransactionWrite, TransactionRead
+from sc.core.transaction.names import TransactionNamesWrite, TransactionNamesRead
+from sc.core.client import Client
+from sc.core.config import Config
+from sc.core.transaction import TransactionWrite, TransactionRead
 
 class Memory:
   
