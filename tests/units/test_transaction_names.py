@@ -85,7 +85,7 @@ class TestNames(MemoryTestCase):
 
   def test_sys_idtf_large(self):
 
-    test_num = 50
+    test_num = 30
 
     nodes = {}
     tr = self.memory.create_write_transaction()
@@ -110,6 +110,8 @@ class TestNames(MemoryTestCase):
     result = tr.run()
     self.assertIsNotNone(result)
 
+    print ('Set', result)
+
     tr = self.memory.create_name_read_transaction()
     for idtf in nodes.keys():
       tr.resolve_by_system_identifier(idtf)
@@ -118,6 +120,8 @@ class TestNames(MemoryTestCase):
     self.assertEqual(len(result), test_num)
     for idtf, el in nodes.items():
       self.assertEqual(result[idtf], el)
+
+    print ('Resolve', result)
 
     
 

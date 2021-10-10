@@ -48,24 +48,27 @@ class TransactionNamesWrite:
     return len(self._sys_idtfs) == 0
 
   def _make_query(self) -> str:
-    query = (f"MATCH (l:{Labels.SC_LINK} {{content: '{Keynodes.NREL_SYS_IDTF}'}})<-[edge:{Labels.SC_EDGE}]-(__sys_idtf:{Labels.SC_NODE}), \n"
-             f"(edge_sock:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n")
-    query += "WITH __sys_idtf\n"
+    query = (f"MATCH (l:{Labels.SC_LINK} {{content: '{Keynodes.NREL_SYS_IDTF}'}})<-[__idtf_edge:{Labels.SC_EDGE}]-(__sys_idtf:{Labels.SC_NODE}), \n"
+             f"(:{Labels.SC_EDGE_SOCK} {{edge_id: id(__idtf_edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n")
 
-    for el, idtf in self._tasks:
-      query += (f"MATCH (el:{el.label}) WHERE id(el) = {el.id}\n"
-                f"WITH el, __sys_idtf\n"
-                f"OPTIONAL MATCH (el)-[edge:{Labels.SC_EDGE}]->(link: {Labels.SC_LINK}),\n"
-                f"(__sys_idtf)-[edge_rel:{Labels.SC_EDGE}]->(edge_sock: {Labels.SC_EDGE_SOCK} {{ edge_id: id(edge)}})\n"
-                f"WITH el, edge_sock, edge, __sys_idtf\n"
-                f"DETACH DELETE edge_sock\nDELETE edge\n"
-                f"WITH __sys_idtf, el\n"
-                f"CREATE (el)-[edge:{Labels.SC_EDGE}]->(link:{Labels.SC_LINK} {{content: '{idtf}', type: 'str', is_url: false}})\n"
-                f"WITH __sys_idtf, edge\n"
-                f"CREATE (edge_sock: {Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}}), (__sys_idtf)-[:{Labels.SC_EDGE}]->(edge_sock)\n"
-                f"WITH __sys_idtf\n")
+    def _subquery_item(task):
+        el, idtf = task
+
+        return (f"\n  MATCH (el:{el.label}) WHERE id(el) = {el.id}\n"
+                f"  OPTIONAL MATCH (el)-[edge:{Labels.SC_EDGE}]->(link: {Labels.SC_LINK}),\n"
+                f"  (edge_sock: {Labels.SC_EDGE_SOCK} {{ edge_id: id(edge)}})<-[edge_rel:{Labels.SC_EDGE}]-(__sys_idtf)\n"
+                f"  RETURN el, edge_sock, edge, '{idtf}' as idtf\n")
       
-    query += "RETURN null"
+    query += (f"CALL {{"
+              f"{'UNION'.join(map(lambda t: _subquery_item(t), self._tasks))}"
+              f"}}\n"
+              f"WITH el, edge_sock, edge, idtf, __sys_idtf\n"
+              f"DETACH DELETE edge_sock\nDELETE edge\n"
+              f"WITH el, idtf, __sys_idtf\n"
+              f"CREATE (el)-[edge:{Labels.SC_EDGE}]->(:{Labels.SC_LINK} {{content: idtf, type: 'str', is_url: false}})\n"
+              f"WITH __sys_idtf, edge\n"
+              f"CREATE (: {Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n"
+              f"RETURN edge")
 
     return query
 
@@ -73,7 +76,7 @@ class TransactionNamesWrite:
     assert  not self._is_empty()
 
     query = self._make_query()
-    # print (query)
+    print (query)
     with self._driver.session() as session:
       return session.write_transaction(TransactionNamesWrite._run_impl, query)
 
