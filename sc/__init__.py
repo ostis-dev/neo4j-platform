@@ -1,3 +1,3 @@
 from sc.memory import Memory
-from sc.transaction import TransactionWrite
-from sc.types import *
+from sc.core.transaction import TransactionWrite
+from sc.core.types import *

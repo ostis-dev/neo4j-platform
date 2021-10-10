@@ -1,7 +1,7 @@
-from sc.transaction.names import TransactionNamesWrite
 from unittest import result
-import sc
 from tests.memory_case import MemoryTestCase
+
+from sc.core.transaction.names import TransactionNamesWrite
 
 class TestNames(MemoryTestCase):
 

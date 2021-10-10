@@ -1,7 +1,6 @@
-from sc import labels
-from sc.types import ElementID
-from sc.keynodes import Keynodes
-from sc.labels import Labels
+from sc.core.types import ElementID
+from sc.core.keynodes import Keynodes
+from sc.core.labels import Labels
 
 import neo4j
 

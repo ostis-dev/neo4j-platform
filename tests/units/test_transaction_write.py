@@ -1,6 +1,7 @@
 from unittest import result
-import sc
 from tests.memory_case import MemoryTestCase
+
+from sc import ElementID
 
 class TestCommon(MemoryTestCase):
 
@@ -77,8 +78,8 @@ class TestEdges(MemoryTestCase):
     src = result["src"]
     trg = result["trg"]
 
-    self.assertTrue(isinstance(src, sc.ElementID))
-    self.assertTrue(isinstance(trg, sc.ElementID))
+    self.assertTrue(isinstance(src, ElementID))
+    self.assertTrue(isinstance(trg, ElementID))
 
     tr = self.memory.create_write_transaction()
     tr.create_edge(src, trg, "sc_edge", "edge")
@@ -95,7 +96,7 @@ class TestEdges(MemoryTestCase):
     src = result["src"]
 
     self.assertIsNotNone(result)
-    self.assertTrue(isinstance(src, sc.ElementID))
+    self.assertTrue(isinstance(src, ElementID))
 
     tr = self.memory.create_write_transaction()
     trg = tr.create_node()
@@ -113,7 +114,7 @@ class TestEdges(MemoryTestCase):
     trg = result["trg"]
 
     self.assertIsNotNone(result)
-    self.assertTrue(isinstance(trg, sc.ElementID))
+    self.assertTrue(isinstance(trg, ElementID))
 
     tr = self.memory.create_write_transaction()
     src = tr.create_node()
