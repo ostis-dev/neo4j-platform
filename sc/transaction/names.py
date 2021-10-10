@@ -76,7 +76,7 @@ class TransactionNamesWrite:
     assert  not self._is_empty()
 
     query = self._make_query()
-    print (query)
+    # print (query)
     with self._driver.session() as session:
       return session.write_transaction(TransactionNamesWrite._run_impl, query)
 
