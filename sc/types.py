@@ -58,11 +58,11 @@ class Type:
         self.__check_valid()
 
     @staticmethod
-    def UNKNOWN():
+    def Unknown():
         return Type(typeSem=TypeSemantic.UNKNOWN)
 
     @staticmethod
-    def NODE(typeConst: TypeConst = TypeConst.UNKNOWN,
+    def Node(typeConst: TypeConst = TypeConst.UNKNOWN,
              typeNode: TypeNode = TypeNode.UNKNOWN):
 
         assert isinstance(typeConst, TypeConst)
@@ -72,19 +72,19 @@ class Type:
                     typeNode=typeNode)
 
     @staticmethod
-    def LINK(typeConst: TypeConst = TypeConst.UNKNOWN):
+    def Link(typeConst: TypeConst = TypeConst.UNKNOWN):
         assert isinstance(typeConst, TypeConst)
         return Type(typeSem=TypeSemantic.LINK,
                     typeConst=typeConst)
 
     @staticmethod
-    def EDGE(typeConst: TypeConst = TypeConst.UNKNOWN):
+    def Edge(typeConst: TypeConst = TypeConst.UNKNOWN):
         assert isinstance(typeConst, TypeConst)
         return Type(typeSem=TypeSemantic.EDGE,
                     typeConst=typeConst)
 
     @staticmethod
-    def ARC(typeConst: TypeConst = TypeConst.UNKNOWN,
+    def Arc(typeConst: TypeConst = TypeConst.UNKNOWN,
             typeArcPos: TypeArcPos = TypeArcPos.UNKNOWN,
             typeArcPerm: TypeArcPerm = TypeArcPerm.UNKNOWN):
 
@@ -97,7 +97,7 @@ class Type:
                     typeArcPerm=typeArcPerm)
 
     @staticmethod
-    def ARC_MEMBER():
+    def ArcMember():
         return Type(typeSem=TypeSemantic.ARC_MEMBER,
                     typeConst=TypeConst.CONST,
                     typeArcPos=TypeArcPos.POS,
@@ -178,3 +178,10 @@ class Type:
             return f"{self._sem.name.capitalize()}(const: {name(self._const)}, pos: {name(self._arcPos)}, perm: {name(self._arcPerm)})"
 
         return f"{self._sem.name}"
+
+    def __eq__(self, o: object) -> bool:
+        return (self._sem == o._sem and
+                self._const == o._const and
+                self._node == o._node and
+                self._arcPerm == o._arcPerm and
+                self._arcPos == o._arcPos)

@@ -99,7 +99,7 @@ class TestTypes(unittest.TestCase):
                           typeArcPos=TypeArcPos.POS)
 
     def test_valid(self):
-        t = Type.UNKNOWN()
+        t = Type.Unknown()
 
         self.assertFalse(t.isArc())
         self.assertFalse(t.isArcMember())
@@ -110,7 +110,7 @@ class TestTypes(unittest.TestCase):
         self.assertFalse(t.isNode())
         self.assertFalse(t.isVar())
 
-        t = Type.NODE(typeConst=TypeConst.CONST)
+        t = Type.Node(typeConst=TypeConst.CONST)
 
         self.assertFalse(t.isArc())
         self.assertFalse(t.isArcMember())
@@ -121,7 +121,7 @@ class TestTypes(unittest.TestCase):
         self.assertTrue(t.isNode())
         self.assertFalse(t.isVar())
 
-        t = Type.LINK(typeConst=TypeConst.VAR)
+        t = Type.Link(typeConst=TypeConst.VAR)
 
         self.assertFalse(t.isArc())
         self.assertFalse(t.isArcMember())
@@ -132,7 +132,7 @@ class TestTypes(unittest.TestCase):
         self.assertFalse(t.isNode())
         self.assertTrue(t.isVar())
 
-        t = Type.ARC()
+        t = Type.Arc()
 
         self.assertTrue(t.isArc())
         self.assertFalse(t.isArcMember())
@@ -143,7 +143,7 @@ class TestTypes(unittest.TestCase):
         self.assertFalse(t.isNode())
         self.assertFalse(t.isVar())
 
-        t = Type.ARC_MEMBER()
+        t = Type.ArcMember()
 
         self.assertFalse(t.isArc())
         self.assertTrue(t.isArcMember())
@@ -154,7 +154,7 @@ class TestTypes(unittest.TestCase):
         self.assertFalse(t.isNode())
         self.assertFalse(t.isVar())
 
-        t = Type.EDGE()
+        t = Type.Edge()
 
         self.assertFalse(t.isArc())
         self.assertFalse(t.isArcMember())
@@ -164,3 +164,12 @@ class TestTypes(unittest.TestCase):
         self.assertFalse(t.isLink())
         self.assertFalse(t.isNode())
         self.assertFalse(t.isVar())
+
+    def test_compare(self):
+        self.assertEqual(Type.Node(), Type.Node())
+        self.assertEqual(Type.Arc(TypeConst.CONST),
+                         Type.Arc(TypeConst.CONST))
+
+        self.assertNotEqual(Type.Node(), Type.Link())
+        self.assertNotEqual(Type.Link(TypeConst.VAR),
+                            Type.Link(TypeConst.CONST))
