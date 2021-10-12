@@ -25,7 +25,6 @@ class Step:
 
     def run(self) -> neo4j.ResultSummary:
 
-        # print (self._query)
         with self._driver.session() as session:
             result = session.write_transaction(Step._run_impl, self._query)
 
