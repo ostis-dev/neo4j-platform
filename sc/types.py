@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Tuple
 
 
 class TypeSemantic(Enum):
@@ -165,3 +164,17 @@ class Type:
 
     def isConnector(self) -> bool:
         return self.isArcMember() or self.isArc() or self.isEdge()
+
+    def __repr__(self) -> str:
+
+        def name(attr) -> str:
+            return attr.name.capitalize() if attr is not None else "None"
+
+        if self.isNode():
+            return f"{self._sem.name.capitalize()}(const: {name(self._const)}, node: {name(self._node)})"
+        elif self.isLink() or self.isEdge():
+            return f"{self._sem.name.capitalize()}(const: {name(self._const)})"
+        elif self.isArc() or self.isArcMember():
+            return f"{self._sem.name.capitalize()}(const: {name(self._const)}, pos: {name(self._arcPos)}, perm: {name(self._arcPerm)})"
+
+        return f"{self._sem.name}"
