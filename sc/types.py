@@ -1,119 +1,167 @@
 from enum import Enum
+from typing import Tuple
+
+
+class TypeSemantic(Enum):
+    UNKNOWN = 0
+    NODE = 1
+    LINK = 2
+    EDGE = 3
+    ARC = 4
+    ARC_MEMBER = 5
+
+
+class TypeNode(Enum):
+    UNKNOWN = 0
+    TUPLE = 1
+    STRUCT = 2
+    ROLE = 3
+    NO_ROLE = 4
+    CLASS = 5
+    ABSTRACT = 6
+    MATERIAL = 7
+
+
+class TypeConst(Enum):
+    UNKNOWN = 0
+    CONST = 1
+    VAR = 2
+
+
+class TypeArcPos(Enum):
+    UNKNOWN = 0
+    POS = 1
+    NEG = 2
+    FUZ = 3
+
+
+class TypeArcPerm(Enum):
+    UNKNOWN = 0
+    TEMP = 1
+    PERM = 2
 
 
 class Type:
-    CONST = 0x20
-    VAR = 0x40
 
-    ARC_POS = 0x80
-    ARC_NEG = 0x100
-    ARC_FUZ = 0x200
+    def __init__(self,
+                 typeSem: TypeSemantic,
+                 typeConst: TypeConst = None,
+                 typeNode: TypeNode = None,
+                 typeArcPos: TypeArcPos = None,
+                 typeArcPerm: TypeArcPerm = None):
 
-    ARC_TEMP = 0x400
-    ARC_PERM = 0x800
+        self._sem = typeSem
+        self._node = typeNode
+        self._const = typeConst
+        self._arcPos = typeArcPos
+        self._arcPerm = typeArcPerm
 
-    NODE_TUPLE = 0x1000
-    NODE_STRUCT = 0x2000
-    NODE_ROLE = 0x4000
-    NODE_NO_ROLE = 0x8000
-    NODE_CLASS = 0x10000
-    NODE_ABSTRACT = 0x20000
-    NODE_MATERIAL = 0x40000
-
-    UNKNOWN = 0
-    NODE = 0x1
-    LINK = 0x2
-    EDGE = 0x4
-    ARC = 0x8
-    ARC_MEMBER = 0x10
-
-    _SEMANTIC_FLAGS = NODE | LINK | ARC | ARC_MEMBER | EDGE
-    _CONNECTOR_FLAGS = ARC | EDGE | ARC_MEMBER
-    _CONST_FLAGS = CONST | VAR
-    _ARC_POS_FLAGS = ARC_POS | ARC_NEG | ARC_FUZ
-    _ARC_PERM_FLAGS = ARC_TEMP | ARC_PERM
-    _NODE_FLAGS = NODE_TUPLE | NODE_STRUCT | NODE_ROLE | NODE_NO_ROLE | NODE_CLASS | NODE_ABSTRACT | NODE_MATERIAL
-
-    def __init__(self, flags: int):
-        self._flags = flags
         self.__check_valid()
 
+    @staticmethod
+    def UNKNOWN():
+        return Type(typeSem=TypeSemantic.UNKNOWN)
+
+    @staticmethod
+    def NODE(typeConst: TypeConst = TypeConst.UNKNOWN,
+             typeNode: TypeNode = TypeNode.UNKNOWN):
+
+        assert isinstance(typeConst, TypeConst)
+        assert isinstance(typeNode, TypeNode)
+        return Type(typeSem=TypeSemantic.NODE,
+                    typeConst=typeConst,
+                    typeNode=typeNode)
+
+    @staticmethod
+    def LINK(typeConst: TypeConst = TypeConst.UNKNOWN):
+        assert isinstance(typeConst, TypeConst)
+        return Type(typeSem=TypeSemantic.LINK,
+                    typeConst=typeConst)
+
+    @staticmethod
+    def EDGE(typeConst: TypeConst = TypeConst.UNKNOWN):
+        assert isinstance(typeConst, TypeConst)
+        return Type(typeSem=TypeSemantic.EDGE,
+                    typeConst=typeConst)
+
+    @staticmethod
+    def ARC(typeConst: TypeConst = TypeConst.UNKNOWN,
+            typeArcPos: TypeArcPos = TypeArcPos.UNKNOWN,
+            typeArcPerm: TypeArcPerm = TypeArcPerm.UNKNOWN):
+
+        assert isinstance(typeConst, TypeConst)
+        assert isinstance(typeArcPos, TypeArcPos)
+        assert isinstance(typeArcPerm, TypeArcPerm)
+        return Type(typeSem=TypeSemantic.ARC,
+                    typeConst=typeConst,
+                    typeArcPos=typeArcPos,
+                    typeArcPerm=typeArcPerm)
+
+    @staticmethod
+    def ARC_MEMBER():
+        return Type(typeSem=TypeSemantic.ARC_MEMBER,
+                    typeConst=TypeConst.CONST,
+                    typeArcPos=TypeArcPos.POS,
+                    typeArcPerm=TypeArcPerm.PERM)
+
     def __check_valid(self):
-        def _check_one_flag(flag):
-            # check if value is power of 2
-            return (flag == 0) or ((flag & (flag - 1)) == 0)
 
-        def _check_only_flags(flags):
-            return (self._flags & (~flags)) == 0
-
-        if (self._flags & Type._SEMANTIC_FLAGS == 0) and ((~Type._CONST_FLAGS) & self._flags) != 0:
+        if self._sem is None:
             raise TypeError("You should specify semantic type or use Unknown")
 
-        if self.isConnector() and self.isNode():
-            raise TypeError(
-                "This is not possible to use Node and Arc | Edge flags in one type")
-        if self.isConnector() and self.isLink():
-            raise TypeError(
-                "This is not possible to use Link and Arc | Edge flags in one type")
+        if self.isArc():
+            if self._arcPerm is None:
+                raise TypeError(
+                    "You should specify permanency flag 'typeArcPerm'")
 
-        if not _check_one_flag(self._flags & Type._CONST_FLAGS):
-            raise TypeError("You have specified more than one constancy flag")
+            if self._arcPos is None:
+                raise TypeError(
+                    "You should specify positivity flag 'typeArcPos'")
+
+        if self.isNode() or self.isLink() or self.isEdge():
+            if self._arcPerm is not None:
+                raise TypeError(
+                    "You can't use 'typeArcPerm' with node/link/edge type")
+            if self._arcPos is not None:
+                raise TypeError(
+                    "You can't use 'typeArcPos' with node/link/edge type")
 
         if self.isConnector():
-            if not _check_one_flag(self._flags & Type._ARC_POS_FLAGS):
-                raise TypeError(
-                    "You have specified more than one arc positivity flag")
-
-            if not _check_one_flag(self._flags & Type._ARC_PERM_FLAGS):
-                raise TypeError(
-                    "You have specified more than one arc permanency flag")
-
-            if not _check_one_flag(self._flags & Type._CONNECTOR_FLAGS):
-                raise TypeError(
-                    "You have specified more than one semantic type for an edge/arc")
-
-            if not self.isEdge():
-                if not _check_only_flags(Type._CONST_FLAGS | Type._ARC_PERM_FLAGS | Type._ARC_POS_FLAGS | Type.ARC | Type.ARC_MEMBER):
-                    raise TypeError(
-                        "You should use only arc related flags for arc type")
-            else:
-                if not _check_only_flags(Type.EDGE | Type._CONST_FLAGS):
-                    raise TypeError("Edge type can only use constancy flags")
-
-        if self.isNode():
-            if not _check_one_flag(self._flags & Type._NODE_FLAGS):
-                raise TypeError("You have specified more than one node flag")
-
-            if not _check_only_flags(Type.NODE | Type._NODE_FLAGS | Type._CONST_FLAGS):
-                raise TypeError("You can use only _NodeFlags for Node type")
+            if self._node is not None:
+                raise TypeError("You can't use 'typeNode' with connectors")
 
         if self.isLink():
-            if not _check_only_flags(Type.LINK | Type._CONST_FLAGS):
-                raise TypeError("Link type can only use constancy flags")
+            if self._node is not None:
+                raise TypeError("You can't use 'typeNode' with link type")
+
+        if self.isArcMember():
+            if self._arcPerm != TypeArcPerm.PERM:
+                raise TypeError("ArcMember should be permanent")
+            if self._arcPos != TypeArcPos.POS:
+                raise TypeError("ArcMember should be positive")
+            if self._const != TypeConst.CONST:
+                raise TypeError("ArcMember should be constant")
 
     def isConst(self) -> bool:
-        return self.hasFlag(Type.CONST)
+        return self._const == TypeConst.CONST
 
     def isVar(self) -> bool:
-        return self.hasFlag(Type.VAR)
+        return self._const == TypeConst.VAR
 
     def isNode(self) -> bool:
-        return self.hasFlag(Type.NODE)
+        return self._sem == TypeSemantic.NODE
 
     def isLink(self) -> bool:
-        return self.hasFlag(Type.LINK)
+        return self._sem == TypeSemantic.LINK
 
     def isEdge(self) -> bool:
-        return self.hasFlag(Type.EDGE)
+        return self._sem == TypeSemantic.EDGE
 
     def isArc(self) -> bool:
-        return self.hasFlag(Type.ARC)
+        return self._sem == TypeSemantic.ARC
 
     def isArcMember(self) -> bool:
-        return self.hasFlag(Type.ARC_MEMBER)
+        return self._sem == TypeSemantic.ARC_MEMBER
 
     def isConnector(self) -> bool:
-        return self.hasFlag(Type._CONNECTOR_FLAGS)
-
-    def hasFlag(self, flag) -> bool:
-        return (self._flags & flag) > 0
+        return self.isArcMember() or self.isArc() or self.isEdge()

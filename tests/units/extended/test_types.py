@@ -1,3 +1,4 @@
+import types
 import unittest
 
 from sc.types import *
@@ -6,58 +7,99 @@ from sc.types import *
 class TestTypes(unittest.TestCase):
 
     def test_invalid_arc(self):
-        self.assertRaises(TypeError, Type, Type.ARC | Type.NODE)
-        self.assertRaises(TypeError, Type, Type.ARC | Type.NODE_TUPLE)
-        self.assertRaises(TypeError, Type, Type.ARC | Type.EDGE)
-        self.assertRaises(TypeError, Type, Type.ARC | Type.LINK)
-
-        self.assertRaises(TypeError, Type, Type.ARC |
-                          Type.ARC_FUZ | Type.ARC_NEG)
-        self.assertRaises(TypeError, Type, Type.ARC | Type.CONST | Type.VAR)
-        self.assertRaises(TypeError, Type, Type.ARC |
-                          Type.ARC_PERM | Type.ARC_TEMP)
+        self.assertRaises(TypeError, Type,
+                          typeSem=TypeSemantic.ARC,
+                          typeNode=TypeNode.TUPLE)
 
     def test_invalid_node(self):
-        self.assertRaises(TypeError, Type, Type.NODE | Type.LINK)
-        self.assertRaises(TypeError, Type, Type.NODE |
-                          Type.NODE_ABSTRACT | Type.NODE_CLASS)
-        self.assertRaises(TypeError, Type, Type.NODE | Type.ARC_FUZ)
-        self.assertRaises(TypeError, Type, Type.NODE | Type.ARC_PERM)
-        self.assertRaises(TypeError, Type, Type.NODE | Type.CONST | Type.VAR)
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.NODE,
+                          typeArcPerm=TypeArcPerm.PERM)
+
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.NODE,
+                          typeArcPos=TypeArcPos.FUZ)
 
     def test_invalid_edge(self):
-        self.assertRaises(TypeError, Type, Type.EDGE | Type.ARC_FUZ)
-        self.assertRaises(TypeError, Type, Type.EDGE | Type.ARC_PERM)
-        self.assertRaises(TypeError, Type, Type.EDGE | Type.CONST | Type.VAR)
-        self.assertRaises(TypeError, Type, Type.EDGE | Type.NODE_ABSTRACT)
+
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.EDGE,
+                          typeArcPerm=TypeArcPerm.PERM)
+
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.EDGE,
+                          typeArcPos=TypeArcPos.POS)
+
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.EDGE,
+                          typeNode=TypeNode.CLASS)
 
     def test_invalid_link(self):
-        self.assertRaises(TypeError, Type, Type.LINK | Type.ARC_PERM)
-        self.assertRaises(TypeError, Type, Type.LINK | Type.NODE_ABSTRACT)
-        self.assertRaises(TypeError, Type, Type.LINK | Type.NODE)
-        self.assertRaises(TypeError, Type, Type.LINK | Type.ARC_FUZ)
-        self.assertRaises(TypeError, Type, Type.LINK | Type.CONST | Type.VAR)
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.LINK,
+                          typeArcPerm=TypeArcPerm.PERM)
+
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.LINK,
+                          typeArcPos=TypeArcPos.POS)
+
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.LINK,
+                          typeNode=TypeNode.ABSTRACT)
 
     def test_invalid_arc_member(self):
-        self.assertRaises(TypeError, Type, Type.ARC_MEMBER | Type.EDGE)
-        self.assertRaises(TypeError, Type, Type.ARC_MEMBER |
-                          Type.ARC_FUZ | Type.ARC_NEG)
-        self.assertRaises(TypeError, Type, Type.ARC_MEMBER |
-                          Type.ARC_PERM | Type.ARC_TEMP)
-        self.assertRaises(TypeError, Type, Type.ARC_MEMBER |
-                          Type.CONST | Type.VAR)
-        self.assertRaises(TypeError, Type, Type.ARC | Type.ARC_MEMBER)
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.ARC_MEMBER,
+                          typeConst=TypeConst.CONST,
+                          typeArcPos=TypeArcPos.UNKNOWN,
+                          typeArcPerm=TypeArcPerm.PERM)
 
-    def test_invalid_flags_common(self):
-        self.assertRaises(TypeError, Type, Type.ARC_MEMBER |
-                          Type.ARC_PERM | Type.ARC_TEMP)
-        self.assertRaises(TypeError, Type, Type.ARC_MEMBER |
-                          Type.ARC_POS | Type.ARC_NEG)
-        self.assertRaises(TypeError, Type, Type.NODE | Type.CONST | Type.VAR)
-        self.assertRaises(TypeError, Type, Type.CONST | Type.ARC_FUZ)
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.ARC_MEMBER,
+                          typeConst=TypeConst.CONST,
+                          typeArcPos=TypeArcPos.FUZ,
+                          typeArcPerm=TypeArcPerm.PERM)
 
-    def test_valid_flags_common(self):
-        t = Type(Type.UNKNOWN)
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.ARC_MEMBER,
+                          typeConst=TypeConst.CONST,
+                          typeArcPos=TypeArcPos.NEG,
+                          typeArcPerm=TypeArcPerm.PERM)
+
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.ARC_MEMBER,
+                          typeConst=TypeConst.CONST,
+                          typeArcPerm=TypeArcPerm.TEMP,
+                          typeArcPos=TypeArcPos.POS)
+
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.ARC_MEMBER,
+                          typeConst=TypeConst.CONST,
+                          typeArcPerm=TypeArcPerm.UNKNOWN,
+                          typeArcPos=TypeArcPos.POS)
+
+        self.assertRaises(TypeError,
+                          Type,
+                          typeSem=TypeSemantic.ARC_MEMBER,
+                          typeConst=TypeConst.VAR,
+                          typeArcPerm=TypeArcPerm.PERM,
+                          typeArcPos=TypeArcPos.POS)
+
+    def test_valid(self):
+        t = Type.UNKNOWN()
 
         self.assertFalse(t.isArc())
         self.assertFalse(t.isArcMember())
@@ -68,7 +110,7 @@ class TestTypes(unittest.TestCase):
         self.assertFalse(t.isNode())
         self.assertFalse(t.isVar())
 
-        t = Type(Type.NODE | Type.CONST)
+        t = Type.NODE(typeConst=TypeConst.CONST)
 
         self.assertFalse(t.isArc())
         self.assertFalse(t.isArcMember())
@@ -79,7 +121,7 @@ class TestTypes(unittest.TestCase):
         self.assertTrue(t.isNode())
         self.assertFalse(t.isVar())
 
-        t = Type(Type.LINK | Type.VAR)
+        t = Type.LINK(typeConst=TypeConst.VAR)
 
         self.assertFalse(t.isArc())
         self.assertFalse(t.isArcMember())
@@ -90,7 +132,7 @@ class TestTypes(unittest.TestCase):
         self.assertFalse(t.isNode())
         self.assertTrue(t.isVar())
 
-        t = Type(Type.ARC)
+        t = Type.ARC()
 
         self.assertTrue(t.isArc())
         self.assertFalse(t.isArcMember())
@@ -101,18 +143,18 @@ class TestTypes(unittest.TestCase):
         self.assertFalse(t.isNode())
         self.assertFalse(t.isVar())
 
-        t = Type(Type.ARC_MEMBER)
+        t = Type.ARC_MEMBER()
 
         self.assertFalse(t.isArc())
         self.assertTrue(t.isArcMember())
         self.assertTrue(t.isConnector())
-        self.assertFalse(t.isConst())
+        self.assertTrue(t.isConst())
         self.assertFalse(t.isEdge())
         self.assertFalse(t.isLink())
         self.assertFalse(t.isNode())
         self.assertFalse(t.isVar())
 
-        t = Type(Type.EDGE)
+        t = Type.EDGE()
 
         self.assertFalse(t.isArc())
         self.assertFalse(t.isArcMember())
