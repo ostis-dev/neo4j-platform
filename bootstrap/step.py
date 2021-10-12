@@ -7,40 +7,41 @@ from sc.core.config import Config
 
 from typing import Union
 
+
 class Step:
 
-  def __init__(self, driver: neo4j.Driver, templ: jinja2.Template, config: Config) -> None:
-    self._driver = driver
-    self._config = config
-    self._error = None
-    self._query = self._load_query(templ)
-  
-  @property
-  def error(self) -> str:
-    return self._error
+    def __init__(self, driver: neo4j.Driver, templ: jinja2.Template, config: Config) -> None:
+        self._driver = driver
+        self._config = config
+        self._error = None
+        self._query = self._load_query(templ)
 
-  def _load_query(self, templ: jinja2.Template) -> str:
-    return templ.render(Keynodes=Keynodes, Labels=Labels)
+    @property
+    def error(self) -> str:
+        return self._error
 
-  def run(self) -> neo4j.ResultSummary:
+    def _load_query(self, templ: jinja2.Template) -> str:
+        return templ.render(Keynodes=Keynodes, Labels=Labels)
 
-    # print (self._query)
-    with self._driver.session() as session:
-      result = session.write_transaction(Step._run_impl, self._query)
+    def run(self) -> neo4j.ResultSummary:
 
-      if isinstance(result, neo4j.ResultSummary):
-        return result
-      else:
-        return None
+        # print (self._query)
+        with self._driver.session() as session:
+            result = session.write_transaction(Step._run_impl, self._query)
 
-  @neo4j.unit_of_work(timeout=30)
-  def _run_impl(tx: neo4j.Transaction, query) -> Union[neo4j.ResultSummary, str]:
-    try:
-      query_res = tx.run(query)
-    except neo4j.exceptions.DriverError as err:
-      return err.message
+            if isinstance(result, neo4j.ResultSummary):
+                return result
+            else:
+                return None
 
-    return query_res.consume()
-  
-  def error(self, desciption: str):
-    self._error = desciption
+    @neo4j.unit_of_work(timeout=30)
+    def _run_impl(tx: neo4j.Transaction, query) -> Union[neo4j.ResultSummary, str]:
+        try:
+            query_res = tx.run(query)
+        except neo4j.exceptions.DriverError as err:
+            return err.message
+
+        return query_res.consume()
+
+    def error(self, desciption: str):
+        self._error = desciption

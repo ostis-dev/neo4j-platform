@@ -4,185 +4,187 @@ from sc.core.labels import Labels
 
 import neo4j
 
+
 class TransactionNamesWriteResult:
 
-  def __init__(self, result_summary: neo4j.ResultSummary):
-    self.run_time = result_summary.result_available_after
-    self.consume_time = result_summary.result_consumed_after
-  
-  def __repr__(self) -> str:
-    return "run_time: {} ms, consume_time: {} ms".format(
-      self.run_time,
-      self.consume_time
-    )
-  
+    def __init__(self, result_summary: neo4j.ResultSummary):
+        self.run_time = result_summary.result_available_after
+        self.consume_time = result_summary.result_consumed_after
+
+    def __repr__(self) -> str:
+        return "run_time: {} ms, consume_time: {} ms".format(
+            self.run_time,
+            self.consume_time
+        )
+
 
 class TransactionNamesWrite:
-  
-  def __init__(self,
-               driver: neo4j.Driver, 
-               nrel_sys_idtf: str = Keynodes.NREL_SYS_IDTF) -> None:
-    self._driver = driver
-    self._sys_idtfs = set()
-    self._tasks = []
 
-    self._nrel_sys_idtf = nrel_sys_idtf
+    def __init__(self,
+                 driver: neo4j.Driver,
+                 nrel_sys_idtf: str = Keynodes.NREL_SYS_IDTF) -> None:
+        self._driver = driver
+        self._sys_idtfs = set()
+        self._tasks = []
 
-    assert isinstance(self._nrel_sys_idtf, str)
+        self._nrel_sys_idtf = nrel_sys_idtf
 
-  def set_system_identifier(self, el: ElementID, sys_idtf: str):
-    """
-    Adds command to setup system identifier of specified element.
-    If element already have system_identifier, then it will be replaces with new one
+        assert isinstance(self._nrel_sys_idtf, str)
 
-    :param el: Element id to setup system identifier
-    :params sys_idtf: Value of system identifier
-    """
-    assert sys_idtf not in self._sys_idtfs
-    
-    self._sys_idtfs.add(sys_idtf)
-    self._tasks.append((el, sys_idtf))
+    def set_system_identifier(self, el: ElementID, sys_idtf: str):
+        """
+        Adds command to setup system identifier of specified element.
+        If element already have system_identifier, then it will be replaces with new one
 
-  def _is_empty(self) -> bool:
-    return len(self._sys_idtfs) == 0
+        :param el: Element id to setup system identifier
+        :params sys_idtf: Value of system identifier
+        """
+        assert sys_idtf not in self._sys_idtfs
 
-  def _make_query(self) -> str:
-    query = (f"MATCH (l:{Labels.SC_LINK} {{content: '{Keynodes.NREL_SYS_IDTF}'}})<-[__idtf_edge:{Labels.SC_EDGE}]-(__sys_idtf:{Labels.SC_NODE}), \n"
-             f"(:{Labels.SC_EDGE_SOCK} {{edge_id: id(__idtf_edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n")
+        self._sys_idtfs.add(sys_idtf)
+        self._tasks.append((el, sys_idtf))
 
-    def _subquery_item(task):
-        el, idtf = task
+    def _is_empty(self) -> bool:
+        return len(self._sys_idtfs) == 0
 
-        return (f"\n  MATCH (el:{el.label}) WHERE id(el) = {el.id}\n"
-                f"  OPTIONAL MATCH (el)-[edge:{Labels.SC_EDGE}]->(link: {Labels.SC_LINK}),\n"
-                f"  (edge_sock: {Labels.SC_EDGE_SOCK} {{ edge_id: id(edge)}})<-[edge_rel:{Labels.SC_EDGE}]-(__sys_idtf)\n"
-                f"  RETURN el, edge_sock, edge, '{idtf}' as idtf\n")
-      
-    query += (f"CALL {{"
-              f"{'UNION'.join(map(lambda t: _subquery_item(t), self._tasks))}"
-              f"}}\n"
-              f"WITH el, edge_sock, edge, idtf, __sys_idtf\n"
-              f"DETACH DELETE edge_sock\nDELETE edge\n"
-              f"WITH el, idtf, __sys_idtf\n"
-              f"CREATE (el)-[edge:{Labels.SC_EDGE}]->(:{Labels.SC_LINK} {{content: idtf, type: 'str', is_url: false}})\n"
-              f"WITH __sys_idtf, edge\n"
-              f"CREATE (: {Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n"
-              f"RETURN edge")
+    def _make_query(self) -> str:
+        query = (f"MATCH (l:{Labels.SC_LINK} {{content: '{Keynodes.NREL_SYS_IDTF}'}})<-[__idtf_edge:{Labels.SC_EDGE}]-(__sys_idtf:{Labels.SC_NODE}), \n"
+                 f"(:{Labels.SC_EDGE_SOCK} {{edge_id: id(__idtf_edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n")
 
-    return query
+        def _subquery_item(task):
+            el, idtf = task
 
-  def run(self) -> TransactionNamesWriteResult:
-    assert  not self._is_empty()
+            return (f"\n  MATCH (el:{el.label}) WHERE id(el) = {el.id}\n"
+                    f"  OPTIONAL MATCH (el)-[edge:{Labels.SC_EDGE}]->(link: {Labels.SC_LINK}),\n"
+                    f"  (edge_sock: {Labels.SC_EDGE_SOCK} {{ edge_id: id(edge)}})<-[edge_rel:{Labels.SC_EDGE}]-(__sys_idtf)\n"
+                    f"  RETURN el, edge_sock, edge, '{idtf}' as idtf\n")
 
-    query = self._make_query()
-    # print (query)
-    with self._driver.session() as session:
-      return session.write_transaction(TransactionNamesWrite._run_impl, query)
+        query += (f"CALL {{"
+                  f"{'UNION'.join(map(lambda t: _subquery_item(t), self._tasks))}"
+                  f"}}\n"
+                  f"WITH el, edge_sock, edge, idtf, __sys_idtf\n"
+                  f"DETACH DELETE edge_sock\nDELETE edge\n"
+                  f"WITH el, idtf, __sys_idtf\n"
+                  f"CREATE (el)-[edge:{Labels.SC_EDGE}]->(:{Labels.SC_LINK} {{content: idtf, type: 'str', is_url: false}})\n"
+                  f"WITH __sys_idtf, edge\n"
+                  f"CREATE (: {Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n"
+                  f"RETURN edge")
 
-  @neo4j.unit_of_work(timeout=30)
-  def _run_impl(tx: neo4j.Transaction, query):
-    try:
-      query_res = tx.run(query)
-    except neo4j.exceptions.DriverError:
-      return None
+        return query
 
-    info = query_res.consume()
-    return TransactionNamesWriteResult(result_summary=info)
+    def run(self) -> TransactionNamesWriteResult:
+        assert not self._is_empty()
+
+        query = self._make_query()
+        # print (query)
+        with self._driver.session() as session:
+            return session.write_transaction(TransactionNamesWrite._run_impl, query)
+
+    @neo4j.unit_of_work(timeout=30)
+    def _run_impl(tx: neo4j.Transaction, query):
+        try:
+            query_res = tx.run(query)
+        except neo4j.exceptions.DriverError:
+            return None
+
+        info = query_res.consume()
+        return TransactionNamesWriteResult(result_summary=info)
 
 # ------------------------------
 
+
 class TransactionNamesReadResult:
 
-  def __init__(self, values: dict, result_summary: neo4j.ResultSummary):
-    self.values = values
-    self.run_time = result_summary.result_available_after
-    self.consume_time = result_summary.result_consumed_after
+    def __init__(self, values: dict, result_summary: neo4j.ResultSummary):
+        self.values = values
+        self.run_time = result_summary.result_available_after
+        self.consume_time = result_summary.result_consumed_after
 
-  def __getitem__(self, idtf):
-    return self.values[idtf]
+    def __getitem__(self, idtf):
+        return self.values[idtf]
 
-  def __len__(self):
-    return len(self.values)
+    def __len__(self):
+        return len(self.values)
 
-  def __repr__(self) -> str:
-    return "values_num: {}, run_time: {} ms, consume_time: {} ms".format(
-      len(self.values.keys()),
-      self.run_time,
-      self.consume_time
-    )
+    def __repr__(self) -> str:
+        return "values_num: {}, run_time: {} ms, consume_time: {} ms".format(
+            len(self.values.keys()),
+            self.run_time,
+            self.consume_time
+        )
 
 
 class TransactionNamesRead:
 
-  def __init__(self,
-               driver: neo4j.Driver, 
-               nrel_sys_idtf: str = Keynodes.NREL_SYS_IDTF) -> None:
-    self._driver = driver
-    self._sys_idtfs = set()
+    def __init__(self,
+                 driver: neo4j.Driver,
+                 nrel_sys_idtf: str = Keynodes.NREL_SYS_IDTF) -> None:
+        self._driver = driver
+        self._sys_idtfs = set()
 
-    self._nrel_sys_idtf = nrel_sys_idtf
+        self._nrel_sys_idtf = nrel_sys_idtf
 
-    assert isinstance(self._nrel_sys_idtf, str)
+        assert isinstance(self._nrel_sys_idtf, str)
 
-  def resolve_by_system_identifier(self, sys_idtf: str) -> str:
-    """
-    Adds command to resolve element by system identifier
+    def resolve_by_system_identifier(self, sys_idtf: str) -> str:
+        """
+        Adds command to resolve element by system identifier
 
-    :params sys_idtf: Value of system identifier
-    :returns Returns alias of result value. IT shoudl be used to get ElementID from result
-    """
-    assert sys_idtf not in self._sys_idtfs
-    
-    self._sys_idtfs.add(sys_idtf)
-    return sys_idtf
+        :params sys_idtf: Value of system identifier
+        :returns Returns alias of result value. IT shoudl be used to get ElementID from result
+        """
+        assert sys_idtf not in self._sys_idtfs
 
-  def _is_empty(self) -> bool:
-    return len(self._sys_idtfs) == 0
+        self._sys_idtfs.add(sys_idtf)
+        return sys_idtf
 
-  def _make_query(self) -> str:
+    def _is_empty(self) -> bool:
+        return len(self._sys_idtfs) == 0
 
-    query = (f"MATCH (l:{Labels.SC_LINK} {{content: '{Keynodes.NREL_SYS_IDTF}'}})<-[edge:{Labels.SC_EDGE}]-(__sys_idtf:{Labels.SC_NODE}), \n"
-             f"(edge_sock:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n"
-             f"WITH __sys_idtf\n")
+    def _make_query(self) -> str:
 
-    with_values = ["__sys_idtf"]
-    for idtf in self._sys_idtfs:
-      if len(with_values) > 1:
-        query += "UNION\n"
+        query = (f"MATCH (l:{Labels.SC_LINK} {{content: '{Keynodes.NREL_SYS_IDTF}'}})<-[edge:{Labels.SC_EDGE}]-(__sys_idtf:{Labels.SC_NODE}), \n"
+                 f"(edge_sock:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n"
+                 f"WITH __sys_idtf\n")
 
-      with_values.append(idtf)
-      query += (f"MATCH (link:{Labels.SC_LINK} {{content: '{idtf}'}}), ({idtf})-[edge:{Labels.SC_EDGE}]->(link),\n"
-                f"(__sys_idtf)-[:{Labels.SC_EDGE}]->(:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})\n"
-                f"RETURN '{idtf}' as idtf, {idtf} as el\n")
+        with_values = ["__sys_idtf"]
+        for idtf in self._sys_idtfs:
+            if len(with_values) > 1:
+                query += "UNION\n"
 
-    return query
+            with_values.append(idtf)
+            query += (f"MATCH (link:{Labels.SC_LINK} {{content: '{idtf}'}}), ({idtf})-[edge:{Labels.SC_EDGE}]->(link),\n"
+                      f"(__sys_idtf)-[:{Labels.SC_EDGE}]->(:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})\n"
+                      f"RETURN '{idtf}' as idtf, {idtf} as el\n")
 
-  def run(self) -> TransactionNamesReadResult:
-    assert  not self._is_empty()
+        return query
 
-    query = self._make_query()
-    # print (query)
-    with self._driver.session() as session:
-      return session.write_transaction(TransactionNamesRead._run_impl, query)
+    def run(self) -> TransactionNamesReadResult:
+        assert not self._is_empty()
 
-  @neo4j.unit_of_work(timeout=10)
-  def _run_impl(tx: neo4j.Transaction, query):
-    try:
-      query_res = tx.run(query)
-    except neo4j.exceptions.DriverError:
-      return None
+        query = self._make_query()
+        # print (query)
+        with self._driver.session() as session:
+            return session.write_transaction(TransactionNamesRead._run_impl, query)
 
-    values = {}
-    for _, record in enumerate(query_res):
-      key = record["idtf"]
-      value = record["el"]
+    @neo4j.unit_of_work(timeout=10)
+    def _run_impl(tx: neo4j.Transaction, query):
+        try:
+            query_res = tx.run(query)
+        except neo4j.exceptions.DriverError:
+            return None
 
-      if isinstance(value, neo4j.graph.Relationship):
-        values[key] = ElementID(value.type, value.id)
-      elif isinstance(value, neo4j.graph.Node):
-        label, = value.labels
-        values[key] = ElementID(label, value.id)
+        values = {}
+        for _, record in enumerate(query_res):
+            key = record["idtf"]
+            value = record["el"]
 
-    info = query_res.consume()
+            if isinstance(value, neo4j.graph.Relationship):
+                values[key] = ElementID(value.type, value.id)
+            elif isinstance(value, neo4j.graph.Node):
+                label, = value.labels
+                values[key] = ElementID(label, value.id)
 
-    return TransactionNamesReadResult(values, result_summary=info)
+        info = query_res.consume()
+
+        return TransactionNamesReadResult(values, result_summary=info)
