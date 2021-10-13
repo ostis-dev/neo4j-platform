@@ -1,13 +1,14 @@
 from unittest import result
+from sc.core.transaction.write import TransactionWrite
 from tests.memory_case import MemoryTestCase
 
-from sc.core.transaction.read import AssignParameter, FixedParameter
+from sc.core.transaction.read import *
 
 
 class TestFindTemplate(MemoryTestCase):
 
     def test_find_triple(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         src = tr.create_node("src")
         trg = tr.create_node("trg")
         edge = tr.create_edge(src, trg, "sc_edge", "edge")
@@ -18,7 +19,7 @@ class TestFindTemplate(MemoryTestCase):
         trg = result[trg]
         edge = result[edge]
 
-        tr = self.memory.create_read_transaction()
+        tr = TransactionRead(self.memory.driver)
         _src, _edge, _trg = tr.triple_faa(FixedParameter(src, "src"), AssignParameter(
             "sc_edge", "edge"), AssignParameter(None, "trg"))
         result = tr.run()
@@ -31,7 +32,7 @@ class TestFindTemplate(MemoryTestCase):
         self.assertEqual(items[_edge], edge)
 
     def test_find_constr_5(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         src = tr.create_node("src")
         trg = tr.create_node("trg")
         attr = tr.create_node("attr")
@@ -47,7 +48,7 @@ class TestFindTemplate(MemoryTestCase):
         edge = result[edge]
         attr_edge = result[attr_edge]
 
-        tr = self.memory.create_read_transaction()
+        tr = TransactionRead(self.memory.driver)
         _src, _edge, _trg = tr.triple_faf(FixedParameter(src, "src"), AssignParameter(
             "sc_edge", "edge"), FixedParameter(trg, "trg"))
         _attr, _attr_edge, _ = tr.triple_faf(FixedParameter(
@@ -65,7 +66,7 @@ class TestFindTemplate(MemoryTestCase):
         self.assertEqual(items[_attr_edge], attr_edge)
 
     def test_find_constr_5_edge_first(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         src = tr.create_node("src")
         trg = tr.create_node("trg")
         attr = tr.create_node("attr")
@@ -81,7 +82,7 @@ class TestFindTemplate(MemoryTestCase):
         edge = result[edge]
         attr_edge = result[attr_edge]
 
-        tr = self.memory.create_read_transaction()
+        tr = TransactionRead(self.memory.driver)
         _src, _edge, _trg = tr.triple_afa(AssignParameter(
             None, "src"), FixedParameter(edge, "edge"), AssignParameter(None, "trg"))
         _attr, _attr_edge, _ = tr.triple_faf(FixedParameter(

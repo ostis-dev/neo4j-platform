@@ -1,13 +1,13 @@
 from unittest import result
 from tests.memory_case import MemoryTestCase
 
-from sc.core.transaction.names import TransactionNamesWrite
+from sc.core.transaction import *
 
 
 class TestNames(MemoryTestCase):
 
     def test_set_system_identifer_dummy(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         node = tr.create_node("node")
         node2 = tr.create_node("node2")
         result = tr.run()
@@ -17,7 +17,7 @@ class TestNames(MemoryTestCase):
         node = result[node]
         node2 = result[node2]
 
-        tr = self.memory.create_name_write_transaction()
+        tr = TransactionNamesWrite(self.memory.driver)
         tr.set_system_identifier(node, "node_sys_idtf")
         tr.set_system_identifier(node2, "node_sys_idtf2")
         result = tr.run()
@@ -25,7 +25,7 @@ class TestNames(MemoryTestCase):
         self.assertIsNotNone(result)
 
     def test_replace_system_identifer_dummy(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         node = tr.create_node("node")
         result = tr.run()
 
@@ -34,21 +34,21 @@ class TestNames(MemoryTestCase):
         node = result[node]
 
         # set first time
-        tr = self.memory.create_name_write_transaction()
+        tr = TransactionNamesWrite(self.memory.driver)
         tr.set_system_identifier(node, "test_idtf")
         result = tr.run()
 
         self.assertIsNotNone(result)
 
         # replace
-        tr = self.memory.create_name_write_transaction()
+        tr = TransactionNamesWrite(self.memory.driver)
         tr.set_system_identifier(node, "test_idtf_replacement")
         result = tr.run()
 
         self.assertIsNotNone(result)
 
     def test_replace_system_identifer_check(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         node = tr.create_node("node")
         result = tr.run()
 
@@ -57,13 +57,13 @@ class TestNames(MemoryTestCase):
         node = result[node]
 
         # set first time
-        tr = self.memory.create_name_write_transaction()
+        tr = TransactionNamesWrite(self.memory.driver)
         tr.set_system_identifier(node, "test_idtf")
         result = tr.run()
 
         self.assertIsNotNone(result)
 
-        tr_read = self.memory.create_name_read_transaction()
+        tr_read = TransactionNamesRead(self.memory.driver)
         node_idtf = tr_read.resolve_by_system_identifier("test_idtf")
         result = tr_read.run()
 
@@ -71,13 +71,13 @@ class TestNames(MemoryTestCase):
         self.assertEqual(result[node_idtf], node)
 
         # replace
-        tr = self.memory.create_name_write_transaction()
+        tr = TransactionNamesWrite(self.memory.driver)
         tr.set_system_identifier(node, "test_idtf_replacement")
         result = tr.run()
 
         self.assertIsNotNone(result)
 
-        tr_read = self.memory.create_name_read_transaction()
+        tr_read = TransactionNamesRead(self.memory.driver)
         node_idtf = tr_read.resolve_by_system_identifier(
             "test_idtf_replacement")
         result = tr_read.run()
@@ -90,7 +90,7 @@ class TestNames(MemoryTestCase):
         test_num = 30
 
         nodes = {}
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         for i in range(test_num):
             node = tr.create_node(f"node_{i}")
 
@@ -105,14 +105,14 @@ class TestNames(MemoryTestCase):
             nodes[alias] = el
             self.assertIsNotNone(el)
 
-        tr = self.memory.create_name_write_transaction()
+        tr = TransactionNamesWrite(self.memory.driver)
         for idtf, el in nodes.items():
             tr.set_system_identifier(el, idtf)
 
         result = tr.run()
         self.assertIsNotNone(result)
 
-        tr = self.memory.create_name_read_transaction()
+        tr = TransactionNamesRead(self.memory.driver)
         for idtf in nodes.keys():
             tr.resolve_by_system_identifier(idtf)
 

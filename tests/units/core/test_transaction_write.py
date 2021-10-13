@@ -2,17 +2,18 @@ from unittest import result
 from tests.memory_case import MemoryTestCase
 
 from sc import ElementID
+from sc.core.transaction import *
 
 
 class TestCommon(MemoryTestCase):
 
     def test_duplicate_alias(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         tr.create_node("alias")
         self.assertRaises(KeyError, tr.create_node, "alias")
 
     def test_no_aliases(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         tr.create_node()
         tr.create_node()
         result = tr.run()
@@ -23,7 +24,7 @@ class TestCommon(MemoryTestCase):
 class TestNodes(MemoryTestCase):
 
     def create_node_dummy(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         name = tr.create_node("alias")
         result = tr.run()
 
@@ -33,7 +34,7 @@ class TestNodes(MemoryTestCase):
         self.assertEqual(name, "alias")
 
     def test_create_nodes(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         tr.create_node("alias")
         tr.create_node("alias2")
         result = tr.run()
@@ -45,7 +46,7 @@ class TestNodes(MemoryTestCase):
 
     def test_create_nodes_large(self):
         nodes_num = 1000
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         for i in range(nodes_num):
             tr.create_node("alias_{}".format(i))
         result = tr.run()
@@ -60,7 +61,7 @@ class TestNodes(MemoryTestCase):
 class TestEdges(MemoryTestCase):
 
     def test_create_edge_dummy(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         src = tr.create_node()
         trg = tr.create_node()
         tr.create_edge(src, trg, "sc_edge", "edge")
@@ -71,7 +72,7 @@ class TestEdges(MemoryTestCase):
         self.assertTrue("edge" in result.values)
 
     def test_create_edge_multi_transaction(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         src = tr.create_node("src")
         trg = tr.create_node("trg")
         result = tr.run()
@@ -84,7 +85,7 @@ class TestEdges(MemoryTestCase):
         self.assertTrue(isinstance(src, ElementID))
         self.assertTrue(isinstance(trg, ElementID))
 
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         tr.create_edge(src, trg, "sc_edge", "edge")
         result = tr.run()
 
@@ -92,7 +93,7 @@ class TestEdges(MemoryTestCase):
         self.assertEqual(len(result), 1)
 
     def test_create_edge_multi_transaction_src(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         src = tr.create_node("src")
         result = tr.run()
 
@@ -101,7 +102,7 @@ class TestEdges(MemoryTestCase):
         self.assertIsNotNone(result)
         self.assertTrue(isinstance(src, ElementID))
 
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         trg = tr.create_node()
         tr.create_edge(src, trg, "sc_edge", "edge")
         result = tr.run()
@@ -110,7 +111,7 @@ class TestEdges(MemoryTestCase):
         self.assertEqual(len(result), 1)
 
     def test_create_edge_multi_transaction_trg(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         trg = tr.create_node("trg")
         result = tr.run()
 
@@ -119,7 +120,7 @@ class TestEdges(MemoryTestCase):
         self.assertIsNotNone(result)
         self.assertTrue(isinstance(trg, ElementID))
 
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         src = tr.create_node()
         tr.create_edge(src, trg, "sc_edge", "edge")
         result = tr.run()
@@ -128,7 +129,7 @@ class TestEdges(MemoryTestCase):
         self.assertEqual(len(result), 1)
 
     def test_edge_to_edge(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         attr = tr.create_node("attr")
         src = tr.create_node("src")
         trg = tr.create_node("trg")
@@ -141,7 +142,7 @@ class TestEdges(MemoryTestCase):
         self.assertEqual(len(result), 5)
 
     def test_links(self):
-        tr = self.memory.create_write_transaction()
+        tr = TransactionWrite(self.memory.driver)
         link_int = tr.create_link_with_content("link_int", 5)
         link_float = tr.create_link_with_content("link_float", 7.89)
         link_str = tr.create_link_with_content("link_str", "string_content")
@@ -151,3 +152,7 @@ class TestEdges(MemoryTestCase):
 
         self.assertIsNotNone(result)
         self.assertEqual(len(result), 4)
+        self.assertIsNotNone(result[link_int])
+        self.assertIsNotNone(result[link_float])
+        self.assertIsNotNone(result[link_str])
+        self.assertIsNotNone(result[link_url])
