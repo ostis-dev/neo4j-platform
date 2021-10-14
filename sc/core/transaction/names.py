@@ -1,8 +1,16 @@
 from sc.core.types import ElementID
 from sc.core.keynodes import Keynodes
-from sc.core.keywords import Labels
+from sc.core.keywords import Labels, TypeAttrs
 
 import neo4j
+
+
+def _const_attr() -> str:
+    return f"{TypeAttrs.CONST}: 'CONST'"
+
+
+def _arc_member_const_pos_perm_attrs() -> str:
+    return f"{TypeAttrs.CONST}: 'CONST', {TypeAttrs.ARC_PERM}: 'PERM', {TypeAttrs.ARC_POS}: 'POS'"
 
 
 class TransactionNamesWriteResult:
@@ -48,15 +56,23 @@ class TransactionNamesWrite:
         return len(self._sys_idtfs) == 0
 
     def _make_query(self) -> str:
-        query = (f"MATCH (l:{Labels.SC_LINK} {{content: '{Keynodes.NREL_SYS_IDTF}'}})<-[__idtf_edge:{Labels.SC_EDGE}]-(__sys_idtf:{Labels.SC_NODE}), \n"
-                 f"(:{Labels.SC_EDGE_SOCK} {{edge_id: id(__idtf_edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n")
+        query = (f"MATCH (l:{Labels.SC_LINK} {{content: '{Keynodes.NREL_SYS_IDTF}', {_const_attr()} }})"
+                 f"<-[__idtf_edge:{Labels.SC_ARC} {{ {TypeAttrs.CONST}: 'CONST' }}]"
+                 f"-(__sys_idtf:{Labels.SC_NODE}), \n"
+                 f"(:{Labels.SC_EDGE_SOCK} {{edge_id: id(__idtf_edge)}})"
+                 f"<-[:{Labels.SC_ARC_MEMBER} {{ {_arc_member_const_pos_perm_attrs()} }}]"
+                 f"-(__sys_idtf)\n")
 
         def _subquery_item(task):
             el, idtf = task
 
             return (f"\n  MATCH (el:{el.label}) WHERE id(el) = {el.id}\n"
-                    f"  OPTIONAL MATCH (el)-[edge:{Labels.SC_EDGE}]->(link: {Labels.SC_LINK}),\n"
-                    f"  (edge_sock: {Labels.SC_EDGE_SOCK} {{ edge_id: id(edge)}})<-[edge_rel:{Labels.SC_EDGE}]-(__sys_idtf)\n"
+                    f"  OPTIONAL MATCH (el)"
+                    f"-[edge:{Labels.SC_ARC} {{ {_const_attr()} }}]"
+                    f"->(link: {Labels.SC_LINK} {{ {_const_attr()} }}),\n"
+                    f"  (edge_sock: {Labels.SC_EDGE_SOCK} {{ edge_id: id(edge)}})"
+                    f"<-[edge_rel:{Labels.SC_ARC_MEMBER} {{ {_arc_member_const_pos_perm_attrs()} }}]"
+                    f"-(__sys_idtf)\n"
                     f"  RETURN el, edge_sock, edge, '{idtf}' as idtf\n")
 
         query += (f"CALL {{"
@@ -65,9 +81,13 @@ class TransactionNamesWrite:
                   f"WITH el, edge_sock, edge, idtf, __sys_idtf\n"
                   f"DETACH DELETE edge_sock\nDELETE edge\n"
                   f"WITH el, idtf, __sys_idtf\n"
-                  f"CREATE (el)-[edge:{Labels.SC_EDGE}]->(:{Labels.SC_LINK} {{content: idtf, type: 'str', is_url: false}})\n"
+                  f"CREATE (el)"
+                  f"-[edge:{Labels.SC_ARC} {{ {_const_attr()} }}]"
+                  f"->(:{Labels.SC_LINK} {{ content: idtf, type: 'str', is_url: false, {_const_attr()} }})\n"
                   f"WITH __sys_idtf, edge\n"
-                  f"CREATE (: {Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n"
+                  f"CREATE (: {Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})"
+                  f"<-[:{Labels.SC_ARC_MEMBER} {{ {_arc_member_const_pos_perm_attrs()} }}]"
+                  f"-(__sys_idtf)\n"
                   f"RETURN edge")
 
         return query
@@ -143,8 +163,12 @@ class TransactionNamesRead:
 
     def _make_query(self) -> str:
 
-        query = (f"MATCH (l:{Labels.SC_LINK} {{content: '{Keynodes.NREL_SYS_IDTF}'}})<-[edge:{Labels.SC_EDGE}]-(__sys_idtf:{Labels.SC_NODE}), \n"
-                 f"(edge_sock:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})<-[:{Labels.SC_EDGE}]-(__sys_idtf)\n"
+        query = (f"MATCH (l:{Labels.SC_LINK} {{ content: '{Keynodes.NREL_SYS_IDTF}', {_const_attr()} }})"
+                 f"<-[edge:{Labels.SC_ARC} {{ {_const_attr()} }}]"
+                 f"-(__sys_idtf:{Labels.SC_NODE}), \n"
+                 f"(edge_sock:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})"
+                 f"<-[:{Labels.SC_ARC_MEMBER} {{ {_arc_member_const_pos_perm_attrs()} }}]"
+                 f"-(__sys_idtf)\n"
                  f"WITH __sys_idtf\n")
 
         with_values = ["__sys_idtf"]
@@ -153,8 +177,9 @@ class TransactionNamesRead:
                 query += "UNION\n"
 
             with_values.append(idtf)
-            query += (f"MATCH (link:{Labels.SC_LINK} {{content: '{idtf}'}}), ({idtf})-[edge:{Labels.SC_EDGE}]->(link),\n"
-                      f"(__sys_idtf)-[:{Labels.SC_EDGE}]->(:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})\n"
+            query += (f"MATCH (link:{Labels.SC_LINK} {{ content: '{idtf}', {_const_attr()} }}),"
+                      f" ({idtf})-[edge:{Labels.SC_ARC} {{ {_const_attr()} }}] -> (link), \n"
+                      f"(__sys_idtf)-[:{Labels.SC_ARC_MEMBER} {{ {_arc_member_const_pos_perm_attrs()} }}]->(:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})\n"
                       f"RETURN '{idtf}' as idtf, {idtf} as el\n")
 
         return query

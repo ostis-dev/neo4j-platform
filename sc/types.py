@@ -1,7 +1,6 @@
 from enum import Enum
-from typing import Type
-from unittest.suite import BaseTestSuite
 
+from sc.core.keywords import TypeAttrs
 
 class TypeNodeStruct(Enum):
     UNKNOWN = 0
@@ -74,6 +73,9 @@ class BaseType:
                 self._kind == BaseType.Kind.EDGE or
                 self._kind == BaseType.Kind.ARC_MEMBER)
 
+    def _toAttrs(self) -> dict:
+        return { TypeAttrs.CONST: self._typeConst.name }
+
 
 class UnknownType(BaseType):
 
@@ -103,6 +105,11 @@ class NodeType(BaseType):
         return (super().__eq__(o) and
                 self.typeConst == o.typeConst and
                 self.typeStruct == o.typeStruct)
+
+    def _toAttrs(self) -> dict:
+        res = super()._toAttrs()
+        res.update({ TypeAttrs.NODE_STRUCT: self._typeStruct.name })
+        return res
 
 
 class LinkType(BaseType):
@@ -161,3 +168,9 @@ class ArcMemberType(BaseType):
 
     def __repr__(self) -> str:
         return f"ArcMemberType(const: {self.typeConst}, pos: {self.typeArcPos}, perm: {self.typeArcPerm})"
+
+    def _toAttrs(self) -> dict:
+        res = super()._toAttrs()
+        res.update({ TypeAttrs.ARC_PERM: self._typeArcPerm.name })
+        res.update({ TypeAttrs.ARC_POS: self._typeArcPos.name })
+        return res

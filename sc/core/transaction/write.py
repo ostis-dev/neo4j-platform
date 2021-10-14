@@ -110,9 +110,15 @@ class TransactionWrite:
             query += " AND ".join([f"id({value[0]})={value[1].id}" for id,
                                   value in self._id_to_alias.items()])
 
+        def _make_attrs(attrs):
+            if attrs is not None and len(attrs) > 0:
+                return f" {{{', '.join([f'{key}: {value}' for key, value in attrs.items()])}}}"
+
+            return ""
+
         # create nodes and edges
         create_nodes = ", ".join(
-            [f"({alias}:{label})" for alias, label in self._nodes_to_create])
+            [f"({alias}:{label}{_make_attrs(attrs)})" for alias, label, attrs in self._nodes_to_create])
         create_sockets = ", ".join(
             [f"({v[0]}_sock:{Labels.SC_EDGE_SOCK})" for v in self._edges_to_create])
 
@@ -122,12 +128,13 @@ class TransactionWrite:
             return alias
 
         create_edges = ", ".join([
-            f"({_process_edge_alias(src_alias)})-[{alias}:{label}]->({_process_edge_alias(trg_alias)})" for alias, src_alias, trg_alias, label in self._edges_to_create
+            f"({_process_edge_alias(src_alias)})-[{alias}:{label}{_make_attrs(attrs)}]->({_process_edge_alias(trg_alias)})"
+            for alias, src_alias, trg_alias, label, attrs in self._edges_to_create
         ])
 
         # create links
         def _create_link(link: tuple):
-            alias, label, is_url, content = link
+            alias, label, is_url, content, attrs = link
             if is_url:
                 assert isinstance(content, str)
 
@@ -141,7 +148,13 @@ class TransactionWrite:
 
             is_url = 1 if is_url else 0
 
-            return f"({alias}:{label} {{ content: '{content}', is_url: '{is_url}', type: '{type}'}})"
+            def _make_link_attrs(attrs):
+                if attrs is not None and len(attrs) > 0:
+                    return ', '.join([f'{key}: {value}' for key, value in attrs.items()])
+
+                return ""
+
+            return f"({alias}:{label} {{ content: '{content}', is_url: '{is_url}', type: '{type}' {_make_link_attrs(attrs)}}})"
 
         create_links = ", ".join([_create_link(link)
                                  for link in self._links_to_create])
