@@ -69,8 +69,22 @@ class TestTypes(unittest.TestCase):
         self.assertFalse(t.isConst())
         self.assertFalse(t.isVar())
 
-        t = ArcType(typeConst=TypeConst.VAR,
-                    typeArcPos=TypeArcPos.FUZ, typeArcPerm=TypeArcPerm.PERM)
+        t = ArcType(typeConst=TypeConst.VAR)
+
+        self.assertTrue(t.isVar())
+        self.assertFalse(t.isConst())
+
+    def test_arc_member(self):
+
+        t = ArcMemberType()
+
+        self.assertEqual(t.kind, BaseType.Kind.ARC_MEMBER)
+        self.assertTrue(t.isConnector())
+        self.assertFalse(t.isConst())
+        self.assertFalse(t.isVar())
+
+        t = ArcMemberType(typeConst=TypeConst.VAR,
+                          typeArcPos=TypeArcPos.FUZ, typeArcPerm=TypeArcPerm.PERM)
 
         self.assertTrue(t.isVar())
         self.assertFalse(t.isConst())

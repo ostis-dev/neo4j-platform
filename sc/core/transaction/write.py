@@ -1,5 +1,5 @@
 from sc.core.types import ElementID
-from sc.core.labels import Labels
+from sc.core.keywords import Labels
 
 from typing import Union
 
@@ -54,14 +54,19 @@ class TransactionWrite:
         self._results[alias] = label
         return alias
 
-    def create_node(self, alias=None) -> str:
+    def create_node(self, alias=None, attrs: dict = {}) -> str:
         alias = self._process_alias(alias, Labels.SC_NODE, prefix="node")
-        self._nodes_to_create.append((alias, Labels.SC_NODE))
+        self._nodes_to_create.append((alias, Labels.SC_NODE, attrs))
         return alias
 
-    def create_link_with_content(self, alias: str = None, content: Union[str, int, float] = None, is_url: bool = False):
+    def create_link_with_content(self,
+                                 alias: str = None,
+                                 content: Union[str, int, float] = None,
+                                 is_url: bool = False,
+                                 attrs: dict = {}):
         alias = self._process_alias(alias, Labels.SC_LINK, prefix="link")
-        self._links_to_create.append((alias, Labels.SC_LINK, is_url, content))
+        self._links_to_create.append(
+            (alias, Labels.SC_LINK, is_url, content, attrs))
         return alias
 
     def _resolve_alias_by_element_id(self, el_id):
@@ -73,7 +78,12 @@ class TransactionWrite:
             self._id_to_alias[el_id.full_id] = (alias, el_id)
             return alias
 
-    def create_edge(self, src: Union[str, ElementID], trg: Union[str, ElementID], edge_label: str, alias: str = None) -> str:
+    def create_edge(self,
+                    src: Union[str, ElementID],
+                    trg: Union[str, ElementID],
+                    edge_label: str,
+                    alias: str = None,
+                    attrs: dict = {}) -> str:
         assert edge_label is not None
         alias = self._process_alias(alias, Labels.SC_EDGE, prefix="edge")
 
@@ -83,7 +93,7 @@ class TransactionWrite:
             trg, str) else self._resolve_alias_by_element_id(trg)
 
         self._edges_to_create.append(
-            (alias, src_alias, trg_alias, Labels.SC_EDGE))
+            (alias, src_alias, trg_alias, Labels.SC_EDGE, attrs))
         self._edge_aliases.add(alias)
 
         return alias

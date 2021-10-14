@@ -41,6 +41,7 @@ class BaseType:
         LINK = 2
         EDGE = 3
         ARC = 4
+        ARC_MEMBER = 5
 
     def __init__(self, kind, typeConst: TypeConst = TypeConst.UNKNOWN):
         self._kind = kind
@@ -63,13 +64,15 @@ class BaseType:
         return self._kind
 
     def __eq__(self, o: object) -> bool:
-        return self._kind == o._kind
+        return self._kind == o._kind and self._typeConst == o._typeConst
 
     def __repr__(self) -> str:
         return f"BaseType(kind: {self._kind.name})"
 
     def isConnector(self) -> bool:
-        return self._kind == BaseType.Kind.ARC or self._kind == BaseType.Kind.EDGE
+        return (self._kind == BaseType.Kind.ARC or
+                self._kind == BaseType.Kind.EDGE or
+                self._kind == BaseType.Kind.ARC_MEMBER)
 
 
 class UnknownType(BaseType):
@@ -107,10 +110,6 @@ class LinkType(BaseType):
     def __init__(self, typeConst: TypeConst = TypeConst.UNKNOWN):
         super().__init__(BaseType.Kind.LINK, typeConst)
 
-    def __eq__(self, o: object) -> bool:
-        return (super().__eq__(o) and
-                self.typeConst == o.typeConst)
-
     def __repr__(self) -> str:
         return f"LinkType(const: {self.typeConst})"
 
@@ -123,18 +122,23 @@ class EdgeType(BaseType):
     def __repr__(self) -> str:
         return f"EdgeType(const: {self.typeConst})"
 
-    def __eq__(self, o: object) -> bool:
-        return (super().__eq__(o) and
-                self.typeConst == o.typeConst)
-
 
 class ArcType(BaseType):
+
+    def __init__(self, typeConst: TypeConst = TypeConst.UNKNOWN):
+        super().__init__(BaseType.Kind.ARC, typeConst=typeConst)
+
+    def __repr__(self) -> str:
+        return f"ArcType(const: {self.typeConst})"
+
+
+class ArcMemberType(BaseType):
 
     def __init__(self,
                  typeConst: TypeConst = TypeConst.UNKNOWN,
                  typeArcPos: TypeArcPos = TypeArcPos.UNKNOWN,
                  typeArcPerm: TypeArcPerm = TypeArcPerm.UNKNOWN):
-        super().__init__(BaseType.Kind.ARC, typeConst)
+        super().__init__(BaseType.Kind.ARC_MEMBER, typeConst)
 
         assert isinstance(typeArcPos, TypeArcPos)
         assert isinstance(typeArcPerm, TypeArcPerm)
@@ -152,9 +156,8 @@ class ArcType(BaseType):
 
     def __eq__(self, o: object) -> bool:
         return (super().__eq__(o) and
-                self.typeConst == o.typeConst and
                 self.typeArcPos == o.typeArcPos and
                 self.typeArcPerm == o.typeArcPerm)
 
     def __repr__(self) -> str:
-        return f"ArcType(const: {self.typeConst}, pos: {self.typeArcPos}, perm: {self.typeArcPerm})"
+        return f"ArcMemberType(const: {self.typeConst}, pos: {self.typeArcPos}, perm: {self.typeArcPerm})"

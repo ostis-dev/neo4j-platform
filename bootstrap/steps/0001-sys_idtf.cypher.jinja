@@ -1,9 +1,11 @@
+{% import 'lib/types.cypher.jinja' as types with context %}
+
 CREATE 
-  (link:{{Labels.SC_LINK}} {content: "{{Keynodes.NREL_SYS_IDTF}}", is_url: false, type: "str"}),
-  (node:{{Labels.SC_NODE}}),
-  (node)-[edge:{{Labels.SC_EDGE}}]->(link)
+  (link:{{Labels.SC_LINK}} {content: "{{Keynodes.NREL_SYS_IDTF}}", is_url: false, type: "str", {{ types.const_attr(TypeConst.CONST) }} }),
+  (node:{{Labels.SC_NODE}} { {{ types.node_const_no_role_attrs() }} }),
+  (node)-[edge:{{Labels.SC_EDGE}} { {{ types.arc_member_const() }} }]->(link)
 WITH edge, node
 CREATE
   (edge_sock:{{Labels.SC_EDGE_SOCK}} {edge_id: id(edge)}),
-  (node)-[:{{Labels.SC_EDGE}}]->(edge_sock)
+  (node)-[:{{Labels.SC_EDGE}} { {{ types.arc_member_const() }} }]->(edge_sock)
 RETURN null

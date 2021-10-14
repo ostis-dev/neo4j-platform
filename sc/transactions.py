@@ -1,5 +1,5 @@
 from sc.core.transaction import *
 
 
-class TransactionReadEx:
+class ScTransactionRead:
     pass

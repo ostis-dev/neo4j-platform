@@ -1,4 +1,5 @@
-{% import 'lib/names.cypher.jinja' as names %}
+{% import 'lib/names.cypher.jinja' as names with context %}
+{% import 'lib/types.cypher.jinja' as types with context %}
 
 {% set keynodes_list = [
   'sc_node', 'sc_link', 'sc_edge', 'sc_arc', 'sc_arc_member',
@@ -9,13 +10,13 @@
   ]%}
 
 {# find system identifier keynode #}
-{{ names.find_sys_idtf_rel(found_name="found_nrel_sys_idtf", Keynodes=Keynodes, Labels=Labels) }}
+{{ names.find_sys_idtf_rel(found_name="found_nrel_sys_idtf") }}
 WITH found_nrel_sys_idtf
 
 {% for keynode in keynodes_list %}
-CREATE (key_{{keynode}}:{{Labels.SC_NODE}})
+CREATE (key_{{keynode}}:{{Labels.SC_NODE}} { {{ types.node_const_class_attrs() }} })
 WITH key_{{keynode}}, found_nrel_sys_idtf
-{{ names.set_sys_idtf(node="key_" + keynode, idtf=keynode, rel_node="found_nrel_sys_idtf", Labels=Labels) }}
+{{ names.set_sys_idtf(node="key_" + keynode, idtf=keynode, rel_node="found_nrel_sys_idtf") }}
 WITH found_nrel_sys_idtf
 {% endfor %}
 

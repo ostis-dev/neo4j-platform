@@ -1,11 +1,13 @@
 import jinja2
 import neo4j
 
-from sc.core.labels import Labels
+from sc.core.keywords import Labels, TypeAttrs
 from sc.core.keynodes import Keynodes
 from sc.core.config import Config
 
 from typing import Union
+
+from sc.types import *
 
 
 class Step:
@@ -21,10 +23,23 @@ class Step:
         return self._error
 
     def _load_query(self, templ: jinja2.Template) -> str:
-        return templ.render(Keynodes=Keynodes, Labels=Labels)
+        def wrap_enum(e) -> object:
+            result = {}
+            for i in e:
+                result[i.name] = i.name
+
+            return result
+
+        return templ.render(
+            Keynodes=Keynodes,
+            Labels=Labels,
+            TypeConst=wrap_enum(TypeConst),
+            TypeNodeStruct=wrap_enum(TypeNodeStruct),
+            TypeArcPos=wrap_enum(TypeArcPos),
+            TypeArcPerm=wrap_enum(TypeArcPerm),
+            TypeAttrs=TypeAttrs)
 
     def run(self) -> neo4j.ResultSummary:
-
         with self._driver.session() as session:
             result = session.write_transaction(Step._run_impl, self._query)
 

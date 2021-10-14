@@ -1,6 +1,6 @@
 from sc.core.types import ElementID
 from sc.core.keynodes import Keynodes
-from sc.core.labels import Labels
+from sc.core.keywords import Labels
 
 import neo4j
 

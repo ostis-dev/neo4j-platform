@@ -1,7 +1,7 @@
 import neo4j
 
 from sc.core.types import ElementID
-from sc.core.labels import Labels
+from sc.core.keywords import Labels
 
 from enum import Enum
 from typing import Union, Tuple
