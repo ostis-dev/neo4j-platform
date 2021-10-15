@@ -10,7 +10,8 @@ def _const_attr() -> str:
 
 
 def _arc_member_const_pos_perm_attrs() -> str:
-    return f"{TypeAttrs.CONST}: 'CONST', {TypeAttrs.ARC_PERM}: 'PERM', {TypeAttrs.ARC_POS}: 'POS'"
+    return (f"{TypeAttrs.CONST}: 'CONST', {TypeAttrs.ARC_PERM}: 'PERM',"
+            f"{TypeAttrs.ARC_POS}: 'POS', {TypeAttrs.ARC_MEMBER}: true")
 
 
 class TransactionNamesWriteResult:
@@ -60,7 +61,7 @@ class TransactionNamesWrite:
                  f"<-[__idtf_edge:{Labels.SC_ARC} {{ {TypeAttrs.CONST}: 'CONST' }}]"
                  f"-(__sys_idtf:{Labels.SC_NODE}), \n"
                  f"(:{Labels.SC_EDGE_SOCK} {{edge_id: id(__idtf_edge)}})"
-                 f"<-[:{Labels.SC_ARC_MEMBER} {{ {_arc_member_const_pos_perm_attrs()} }}]"
+                 f"<-[:{Labels.SC_ARC} {{ {_arc_member_const_pos_perm_attrs()} }}]"
                  f"-(__sys_idtf)\n")
 
         def _subquery_item(task):
@@ -71,7 +72,7 @@ class TransactionNamesWrite:
                     f"-[edge:{Labels.SC_ARC} {{ {_const_attr()} }}]"
                     f"->(link: {Labels.SC_LINK} {{ {_const_attr()} }}),\n"
                     f"  (edge_sock: {Labels.SC_EDGE_SOCK} {{ edge_id: id(edge)}})"
-                    f"<-[edge_rel:{Labels.SC_ARC_MEMBER} {{ {_arc_member_const_pos_perm_attrs()} }}]"
+                    f"<-[edge_rel:{Labels.SC_ARC} {{ {_arc_member_const_pos_perm_attrs()} }}]"
                     f"-(__sys_idtf)\n"
                     f"  RETURN el, edge_sock, edge, '{idtf}' as idtf\n")
 
@@ -81,13 +82,9 @@ class TransactionNamesWrite:
                   f"WITH el, edge_sock, edge, idtf, __sys_idtf\n"
                   f"DETACH DELETE edge_sock\nDELETE edge\n"
                   f"WITH el, idtf, __sys_idtf\n"
-                  f"CREATE (el)"
-                  f"-[edge:{Labels.SC_ARC} {{ {_const_attr()} }}]"
-                  f"->(:{Labels.SC_LINK} {{ content: idtf, type: 'str', is_url: false, {_const_attr()} }})\n"
+                  f"CREATE (el)-[edge:{Labels.SC_ARC} {{ {_const_attr()} }}]->(:{Labels.SC_LINK} {{ content: idtf, type: 'str', is_url: false, {_const_attr()} }})\n"
                   f"WITH __sys_idtf, edge\n"
-                  f"CREATE (: {Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})"
-                  f"<-[:{Labels.SC_ARC_MEMBER} {{ {_arc_member_const_pos_perm_attrs()} }}]"
-                  f"-(__sys_idtf)\n"
+                  f"CREATE (: {Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})<-[:{Labels.SC_ARC} {{ {_arc_member_const_pos_perm_attrs()} }}]-(__sys_idtf)\n"
                   f"RETURN edge")
 
         return query
@@ -167,7 +164,7 @@ class TransactionNamesRead:
                  f"<-[edge:{Labels.SC_ARC} {{ {_const_attr()} }}]"
                  f"-(__sys_idtf:{Labels.SC_NODE}), \n"
                  f"(edge_sock:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})"
-                 f"<-[:{Labels.SC_ARC_MEMBER} {{ {_arc_member_const_pos_perm_attrs()} }}]"
+                 f"<-[:{Labels.SC_ARC} {{ {_arc_member_const_pos_perm_attrs()} }}]"
                  f"-(__sys_idtf)\n"
                  f"WITH __sys_idtf\n")
 
@@ -179,7 +176,7 @@ class TransactionNamesRead:
             with_values.append(idtf)
             query += (f"MATCH (link:{Labels.SC_LINK} {{ content: '{idtf}', {_const_attr()} }}),"
                       f" ({idtf})-[edge:{Labels.SC_ARC} {{ {_const_attr()} }}] -> (link), \n"
-                      f"(__sys_idtf)-[:{Labels.SC_ARC_MEMBER} {{ {_arc_member_const_pos_perm_attrs()} }}]->(:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})\n"
+                      f"(__sys_idtf)-[:{Labels.SC_ARC} {{ {_arc_member_const_pos_perm_attrs()} }}]->(:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})\n"
                       f"RETURN '{idtf}' as idtf, {idtf} as el\n")
 
         return query

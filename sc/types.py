@@ -2,6 +2,7 @@ from enum import Enum
 
 from sc.core.keywords import TypeAttrs
 
+
 class TypeNodeStruct(Enum):
     UNKNOWN = 0
     TUPLE = 1
@@ -74,7 +75,7 @@ class BaseType:
                 self._kind == BaseType.Kind.ARC_MEMBER)
 
     def _toAttrs(self) -> dict:
-        return { TypeAttrs.CONST: self._typeConst.name }
+        return {TypeAttrs.CONST: self._typeConst.name} if self._typeConst != TypeConst.UNKNOWN else {}
 
 
 class UnknownType(BaseType):
@@ -108,7 +109,8 @@ class NodeType(BaseType):
 
     def _toAttrs(self) -> dict:
         res = super()._toAttrs()
-        res.update({ TypeAttrs.NODE_STRUCT: self._typeStruct.name })
+        if self._typeStruct != TypeNodeStruct.UNKNOWN:
+            res.update({TypeAttrs.NODE_STRUCT: self._typeStruct.name})
         return res
 
 
@@ -139,13 +141,13 @@ class ArcType(BaseType):
         return f"ArcType(const: {self.typeConst})"
 
 
-class ArcMemberType(BaseType):
+class ArcMemberType(ArcType):
 
     def __init__(self,
                  typeConst: TypeConst = TypeConst.UNKNOWN,
                  typeArcPos: TypeArcPos = TypeArcPos.UNKNOWN,
                  typeArcPerm: TypeArcPerm = TypeArcPerm.UNKNOWN):
-        super().__init__(BaseType.Kind.ARC_MEMBER, typeConst)
+        super().__init__(typeConst)
 
         assert isinstance(typeArcPos, TypeArcPos)
         assert isinstance(typeArcPerm, TypeArcPerm)
@@ -171,6 +173,9 @@ class ArcMemberType(BaseType):
 
     def _toAttrs(self) -> dict:
         res = super()._toAttrs()
-        res.update({ TypeAttrs.ARC_PERM: self._typeArcPerm.name })
-        res.update({ TypeAttrs.ARC_POS: self._typeArcPos.name })
+        if self._typeArcPerm != TypeArcPerm.UNKNOWN:
+            res.update({TypeAttrs.ARC_PERM: self._typeArcPerm.name})
+        if self._typeArcPos != TypeArcPos.UNKNOWN:
+            res.update({TypeAttrs.ARC_POS: self._typeArcPos.name})
+        res.update({TypeAttrs.ARC_MEMBER: True})
         return res

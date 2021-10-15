@@ -7,5 +7,5 @@ CREATE
 WITH edge, node
 CREATE
   (edge_sock:{{Labels.SC_EDGE_SOCK}} {edge_id: id(edge)}),
-  (node)-[:{{Labels.SC_ARC_MEMBER}} { {{ types.arc_member_const_pos_perm() }} }]->(edge_sock)
+  (node)-[:{{Labels.SC_ARC}} { {{ types.arc_member_const_pos_perm() }} }]->(edge_sock)
 RETURN null

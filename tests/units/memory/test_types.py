@@ -78,7 +78,7 @@ class TestTypes(unittest.TestCase):
 
         t = ArcMemberType()
 
-        self.assertEqual(t.kind, BaseType.Kind.ARC_MEMBER)
+        self.assertEqual(t.kind, BaseType.Kind.ARC)
         self.assertTrue(t.isConnector())
         self.assertFalse(t.isConst())
         self.assertFalse(t.isVar())
