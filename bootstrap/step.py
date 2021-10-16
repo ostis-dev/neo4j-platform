@@ -7,7 +7,7 @@ from sc.core.config import Config
 
 from typing import Union
 
-from sc.types import *
+from sc.core.types import *
 
 
 class Step:

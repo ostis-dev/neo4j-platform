@@ -1,6 +1,7 @@
-from sc.core.types import ElementID
+from sc.core.element import Element
 from sc.core.keynodes import Keynodes
 from sc.core.keywords import Labels, TypeAttrs
+from sc.core.transaction.utils import _parse_output_element, _get_label_from_type
 
 import neo4j
 
@@ -40,7 +41,7 @@ class TransactionNamesWrite:
 
         assert isinstance(self._nrel_sys_idtf, str)
 
-    def set_system_identifier(self, el: ElementID, sys_idtf: str):
+    def set_system_identifier(self, el: Element, sys_idtf: str):
         """
         Adds command to setup system identifier of specified element.
         If element already have system_identifier, then it will be replaces with new one
@@ -67,7 +68,7 @@ class TransactionNamesWrite:
         def _subquery_item(task):
             el, idtf = task
 
-            return (f"\n  MATCH (el:{el.label}) WHERE id(el) = {el.id}\n"
+            return (f"\n  MATCH (el:{_get_label_from_type(el.type)}) WHERE id(el) = {el.id.identity}\n"
                     f"  OPTIONAL MATCH (el)"
                     f"-[edge:{Labels.SC_ARC} {{ {_const_attr()} }}]"
                     f"->(link: {Labels.SC_LINK} {{ {_const_attr()} }}),\n"
@@ -201,11 +202,7 @@ class TransactionNamesRead:
             key = record["idtf"]
             value = record["el"]
 
-            if isinstance(value, neo4j.graph.Relationship):
-                values[key] = ElementID(value.type, value.id)
-            elif isinstance(value, neo4j.graph.Node):
-                label, = value.labels
-                values[key] = ElementID(label, value.id)
+            values[key] = _parse_output_element(value)
 
         info = query_res.consume()
 

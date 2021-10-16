@@ -1,15 +1,19 @@
-from unittest import result
+from sc.core.keywords import Labels
+from sc.core.types import NodeType, TypeConst
 from tests.memory_case import MemoryTestCase
 
 from sc.core.transaction import *
+from tests.units.core.test_transaction_read import NodeConst
+
+NodeConst = NodeType(const=TypeConst.CONST)
 
 
 class TestNames(MemoryTestCase):
 
     def test_set_system_identifer_dummy(self):
         tr = TransactionWrite(self.memory.driver)
-        node = tr.create_node("node")
-        node2 = tr.create_node("node2")
+        node = tr.create_node(NodeConst, alias="node")
+        node2 = tr.create_node(NodeConst, alias="node2")
         result = tr.run()
 
         self.assertEqual(len(result), 2)
@@ -26,7 +30,7 @@ class TestNames(MemoryTestCase):
 
     def test_replace_system_identifer_dummy(self):
         tr = TransactionWrite(self.memory.driver)
-        node = tr.create_node("node")
+        node = tr.create_node(NodeConst, alias="node")
         result = tr.run()
 
         self.assertEqual(len(result), 1)
@@ -49,7 +53,7 @@ class TestNames(MemoryTestCase):
 
     def test_replace_system_identifer_check(self):
         tr = TransactionWrite(self.memory.driver)
-        node = tr.create_node("node")
+        node = tr.create_node(NodeConst, alias="node")
         result = tr.run()
 
         self.assertEqual(len(result), 1)
@@ -92,7 +96,7 @@ class TestNames(MemoryTestCase):
         nodes = {}
         tr = TransactionWrite(self.memory.driver)
         for i in range(test_num):
-            node = tr.create_node(f"node_{i}")
+            node = tr.create_node(NodeConst, alias=f"node_{i}")
 
         result = tr.run()
 

@@ -1,21 +1,32 @@
 from unittest import result
+from sc.core.types import ArcType, LinkType, NodeType, TypeArcPerm, TypeArcPos, TypeConst, TypeNodeStruct
 from tests.memory_case import MemoryTestCase
 
-from sc import ElementID
+from sc.core.element import Element
 from sc.core.transaction import *
+from sc.core.keywords import Labels
+
+
+NodeConst = NodeType(const=TypeConst.CONST)
+LinkConst = LinkType(const=TypeConst.CONST)
+ArcMemberConstPosPerm = ArcType(
+    const=TypeConst.CONST,
+    arc_pos=TypeArcPos.POS,
+    arc_perm=TypeArcPerm.PERM,
+    is_member=True)
 
 
 class TestCommon(MemoryTestCase):
 
     def test_duplicate_alias(self):
         tr = TransactionWrite(self.memory.driver)
-        tr.create_node("alias")
-        self.assertRaises(KeyError, tr.create_node, "alias")
+        tr.create_node(NodeConst, alias="alias")
+        self.assertRaises(KeyError, tr.create_node, NodeConst, "alias")
 
     def test_no_aliases(self):
         tr = TransactionWrite(self.memory.driver)
-        tr.create_node()
-        tr.create_node()
+        tr.create_node(NodeConst)
+        tr.create_node(NodeConst)
         result = tr.run()
 
         self.assertIsNotNone(result)
@@ -25,7 +36,7 @@ class TestNodes(MemoryTestCase):
 
     def create_node_dummy(self):
         tr = TransactionWrite(self.memory.driver)
-        name = tr.create_node("alias")
+        name = tr.create_node(NodeConst, alias="alias")
         result = tr.run()
 
         self.assertIsNotNone(result)
@@ -35,8 +46,8 @@ class TestNodes(MemoryTestCase):
 
     def test_create_nodes(self):
         tr = TransactionWrite(self.memory.driver)
-        tr.create_node("alias")
-        tr.create_node("alias2")
+        tr.create_node(NodeConst, alias="alias")
+        tr.create_node(NodeConst, alias="alias2")
         result = tr.run()
 
         self.assertIsNotNone(result)
@@ -48,7 +59,8 @@ class TestNodes(MemoryTestCase):
         nodes_num = 1000
         tr = TransactionWrite(self.memory.driver)
         for i in range(nodes_num):
-            tr.create_node("alias_{}".format(i))
+            tr.create_node(NodeConst, alias="alias_{}".format(i))
+
         result = tr.run()
 
         self.assertIsNotNone(result)
@@ -62,9 +74,9 @@ class TestEdges(MemoryTestCase):
 
     def test_create_edge_dummy(self):
         tr = TransactionWrite(self.memory.driver)
-        src = tr.create_node()
-        trg = tr.create_node()
-        tr.create_edge(src, trg, "sc_edge", "edge")
+        src = tr.create_node(NodeConst)
+        trg = tr.create_node(NodeConst)
+        tr.create_edge(src, trg, ArcMemberConstPosPerm, "edge")
 
         result = tr.run()
         self.assertIsNotNone(result)
@@ -73,8 +85,8 @@ class TestEdges(MemoryTestCase):
 
     def test_create_edge_multi_transaction(self):
         tr = TransactionWrite(self.memory.driver)
-        src = tr.create_node("src")
-        trg = tr.create_node("trg")
+        src = tr.create_node(NodeConst, alias="src")
+        trg = tr.create_node(NodeConst, alias="trg")
         result = tr.run()
 
         self.assertIsNotNone(result)
@@ -82,11 +94,11 @@ class TestEdges(MemoryTestCase):
         src = result["src"]
         trg = result["trg"]
 
-        self.assertTrue(isinstance(src, ElementID))
-        self.assertTrue(isinstance(trg, ElementID))
+        self.assertTrue(isinstance(src, Element))
+        self.assertTrue(isinstance(trg, Element))
 
         tr = TransactionWrite(self.memory.driver)
-        tr.create_edge(src, trg, "sc_edge", "edge")
+        tr.create_edge(src, trg, ArcMemberConstPosPerm, "edge")
         result = tr.run()
 
         self.assertIsNotNone(result)
@@ -94,17 +106,17 @@ class TestEdges(MemoryTestCase):
 
     def test_create_edge_multi_transaction_src(self):
         tr = TransactionWrite(self.memory.driver)
-        src = tr.create_node("src")
+        src = tr.create_node(NodeConst, alias="src")
         result = tr.run()
 
         src = result["src"]
 
         self.assertIsNotNone(result)
-        self.assertTrue(isinstance(src, ElementID))
+        self.assertTrue(isinstance(src, Element))
 
         tr = TransactionWrite(self.memory.driver)
-        trg = tr.create_node()
-        tr.create_edge(src, trg, "sc_edge", "edge")
+        trg = tr.create_node(NodeConst)
+        tr.create_edge(src, trg, ArcMemberConstPosPerm, "edge")
         result = tr.run()
 
         self.assertIsNotNone(result)
@@ -112,30 +124,31 @@ class TestEdges(MemoryTestCase):
 
     def test_create_edge_multi_transaction_trg(self):
         tr = TransactionWrite(self.memory.driver)
-        trg = tr.create_node("trg")
+        trg = tr.create_node(NodeConst, alias="trg")
         result = tr.run()
 
         trg = result["trg"]
 
         self.assertIsNotNone(result)
-        self.assertTrue(isinstance(trg, ElementID))
+        self.assertTrue(isinstance(trg, Element))
 
         tr = TransactionWrite(self.memory.driver)
-        src = tr.create_node()
-        tr.create_edge(src, trg, "sc_edge", "edge")
+        src = tr.create_node(NodeConst)
+        tr.create_edge(src, trg, ArcMemberConstPosPerm, "edge")
         result = tr.run()
 
         self.assertIsNotNone(result)
         self.assertEqual(len(result), 1)
 
     def test_edge_to_edge(self):
-        tr = TransactionWrite(self.memory.driver)
-        attr = tr.create_node("attr")
-        src = tr.create_node("src")
-        trg = tr.create_node("trg")
-        edge = tr.create_edge(src, trg, "sc_edge", "edge")
 
-        tr.create_edge(attr, edge, "sc_edge", "edge_attr")
+        tr = TransactionWrite(self.memory.driver)
+        attr = tr.create_node(NodeConst, alias="attr")
+        src = tr.create_node(NodeConst, alias="src")
+        trg = tr.create_node(NodeConst, alias="trg")
+        edge = tr.create_edge(src, trg, ArcMemberConstPosPerm, alias="edge")
+
+        tr.create_edge(attr, edge, ArcMemberConstPosPerm, alias="edge_attr")
         result = tr.run()
 
         self.assertIsNotNone(result)
@@ -143,10 +156,22 @@ class TestEdges(MemoryTestCase):
 
     def test_links(self):
         tr = TransactionWrite(self.memory.driver)
-        link_int = tr.create_link_with_content("link_int", 5)
-        link_float = tr.create_link_with_content("link_float", 7.89)
-        link_str = tr.create_link_with_content("link_str", "string_content")
-        link_url = tr.create_link_with_content("link_url", "http://test.test")
+        link_int = tr.create_link_with_content(
+            LinkConst,
+            alias="link_int",
+            content=5)
+        link_float = tr.create_link_with_content(
+            LinkConst,
+            alias="link_float",
+            content=7.89)
+        link_str = tr.create_link_with_content(
+            LinkConst,
+            alias="link_str",
+            content="string_content")
+        link_url = tr.create_link_with_content(
+            LinkConst,
+            alias="link_url",
+            content="http://test.test")
 
         result = tr.run()
 

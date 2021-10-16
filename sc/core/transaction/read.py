@@ -1,7 +1,9 @@
 import neo4j
 
-from sc.core.types import ElementID
+from sc.core.element import Element
 from sc.core.keywords import Labels
+
+from sc.core.transaction.utils import _parse_output_element, _get_label_from_type
 
 from enum import Enum
 from typing import Union, Tuple
@@ -9,17 +11,23 @@ from typing import Union, Tuple
 
 class FixedParameter:
 
-    def __init__(self, el_id: ElementID, alias: str = None):
-        self._el_id = el_id
+    def __init__(self, el: Element, alias: str = None):
+        assert isinstance(el, Element)
+
+        self._element = el
         self._alias = alias
 
     @property
-    def id(self):
-        return self._el_id
+    def element(self):
+        return self._element
 
     @property
     def alias(self):
         return self._alias
+
+    @property
+    def id(self):
+        return self._element.id
 
     def __repr__(self) -> str:
         return f'FixedParameter(id: {self.id}, alias: {self.alias})'
@@ -49,7 +57,7 @@ class TransactionReadResult:
         def __init__(self, values: dict):
             self._values = values
 
-        def __getitem__(self, alias):
+        def __getitem__(self, alias) -> Element:
             return self._values[alias]
 
         def __len__(self):
@@ -110,7 +118,7 @@ class TransactionRead:
             try:
                 alias = self._id_to_alias[element.id.full_id][0]
                 if alias != element.alias:
-                    raise f"Element `{element.id.full_id}` already exist with alias `{alias}`"
+                    raise f"Element `{element}` already exist with alias `{alias}`"
             except KeyError:
                 if alias is None:
                     alias = f'f_{len(self._id_to_alias)}'
@@ -158,8 +166,11 @@ class TransactionRead:
         assert source_alias is not None
         assert target_alias is not None
 
-        self._triples.append((TransactionRead.TripleType.FAA, source_alias,
-                             (edge_alias, edge.label), (target_alias, target.label)))
+        self._triples.append((
+            TransactionRead.TripleType.FAA, source_alias,
+            (edge_alias, edge.label),
+            (target_alias, target.label)))
+
         return (source_alias, edge_alias, target_alias)
 
     def triple_aaf(self, source: AssignParameter, edge: AssignParameter, target: Union[str, FixedParameter]) -> Tuple:
@@ -177,8 +188,12 @@ class TransactionRead:
 
         self._edges.add(edge_alias)
 
-        self._triples.append((TransactionRead.TripleType.AAF,
-                             (source_alias, source.label), (edge_alias, edge.label), target))
+        self._triples.append((
+            TransactionRead.TripleType.AAF,
+            (source_alias, source.label),
+            (edge_alias, edge.label),
+            target))
+
         return (source_alias, edge_alias, target_alias)
 
     def triple_afa(self, source: AssignParameter, edge: Union[str, FixedParameter], target: AssignParameter) -> Tuple:
@@ -196,8 +211,12 @@ class TransactionRead:
 
         self._edges.add(edge_alias)
 
-        self._triples.append((TransactionRead.TripleType.AFA, (source_alias,
-                             source.label), edge_alias, (target_alias, target.label)))
+        self._triples.append((
+            TransactionRead.TripleType.AFA,
+            (source_alias, source.label),
+            edge_alias,
+            (target_alias, target.label)))
+
         return (source_alias, edge_alias, target_alias)
 
     def triple_faf(self, source: Union[str, FixedParameter], edge: AssignParameter, target: Union[str, FixedParameter]) -> Tuple:
@@ -223,16 +242,25 @@ class TransactionRead:
 
         self._edges.add(edge_alias)
 
-        self._triples.append((TransactionRead.TripleType.FAF,
-                             source_alias, (edge_alias, edge.label), target_alias))
+        self._triples.append((
+            TransactionRead.TripleType.FAF,
+            source_alias,
+            (edge_alias, edge.label),
+            target_alias))
+
         return (source_alias, edge_alias, target_alias)
 
     def _make_query(self) -> str:
         required_sockets = set()
 
         def _param_to_match(p):
+            def _make_attrs(attrs):
+                if attrs is not None and len(attrs) > 0:
+                    return " { " + ', '.join([f"{key}: '{value}'" for key, value in attrs.items()]) + " }"
+                return ""
+
             if isinstance(p, tuple):
-                return f'{p[0]}:{p[1]}' if p[1] is not None else p[0]
+                return f'{p[0]}:{_get_label_from_type(p[1])} {_make_attrs(p[1]._to_attrs())}' if p[1] is not None else p[0]
             return p
 
         def _process_edge(p):
@@ -263,7 +291,7 @@ class TransactionRead:
 
         where_section = "\nWHERE "
         fixed_elements = " AND ".join(
-            map(lambda r: f'id({r[0]}) = {r[1].id}', self._id_to_alias.values()))
+            map(lambda r: f'id({r[0]}) = {r[1].identity}', self._id_to_alias.values()))
         if len(fixed_elements) > 0:
             where_section += fixed_elements
         socket_edges = " AND ".join(
@@ -290,7 +318,7 @@ class TransactionRead:
             return TransactionReadResult()
 
         query = self._make_query()
-        # print (query)
+        # print(query)
         with self._driver.session() as session:
             return session.write_transaction(TransactionRead._run_impl, query, self._result)
 
@@ -305,16 +333,11 @@ class TransactionRead:
         for ix, record in enumerate(query_res):
             values = {}
 
-            for key, value in record.items():
+            for key, item in record.items():
                 if key == "null":
                     continue
 
-                if key in result_aliases:
-                    if isinstance(value, neo4j.graph.Relationship):
-                        values[key] = ElementID(value.type, value.id)
-                    elif isinstance(value, neo4j.graph.Node):
-                        label, = value.labels
-                        values[key] = ElementID(label, value.id)
+                values[key] = _parse_output_element(item)
 
             result_items.append(TransactionReadResult.Item(values))
 
