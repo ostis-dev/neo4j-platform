@@ -151,7 +151,7 @@ class ArcType(BaseType):
                  const: TypeConst = TypeConst.UNKNOWN,
                  arc_pos: TypeArcPos = TypeArcPos.UNKNOWN,
                  arc_perm: TypeArcPerm = TypeArcPerm.UNKNOWN,
-                 is_member: bool = False):
+                 is_member: bool = None):
         super().__init__(BaseType.Kind.ARC, const=const)
 
         assert isinstance(arc_pos, TypeArcPos)

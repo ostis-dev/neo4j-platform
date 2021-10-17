@@ -1,8 +1,9 @@
 from unittest import result
+import unittest
 from sc.core.types import ArcType, LinkType, NodeType, TypeArcPerm, TypeArcPos, TypeConst, TypeNodeStruct
 from tests.memory_case import MemoryTestCase
 
-from sc.core.element import Element
+from sc.core.element import Element, Link
 from sc.core.transaction import *
 from sc.core.keywords import Labels
 
@@ -30,6 +31,35 @@ class TestCommon(MemoryTestCase):
         result = tr.run()
 
         self.assertIsNotNone(result)
+
+    def test_created_results(self):
+
+        tr = TransactionWrite(self.memory.driver)
+        node = tr.create_node(NodeConst)
+        link = tr.create_link_with_content(
+            LinkConst, content="test_content", is_url=False)
+        arc = tr.create_edge(node, link, ArcMemberConstPosPerm)
+
+        result = tr.run()
+
+        node = result[node]
+        self.assertIsNotNone(node)
+        self.assertTrue(node.type.is_node())
+        self.assertTrue(node.type.is_const())
+        self.assertIsInstance(node.type, NodeType)
+
+        link = result[link]
+        self.assertIsNotNone(link)
+        self.assertTrue(link.type.is_link())
+        self.assertTrue(link.type.is_const())
+        self.assertIsInstance(link.type, LinkType)
+
+        arc = result[arc]
+        self.assertIsNotNone(arc)
+        self.assertTrue(arc.type.is_arc())
+        self.assertTrue(arc.type.is_const())
+        self.assertTrue(arc.type.is_member)
+        self.assertIsInstance(arc.type, ArcType)
 
 
 class TestNodes(MemoryTestCase):
@@ -80,7 +110,7 @@ class TestEdges(MemoryTestCase):
 
         result = tr.run()
         self.assertIsNotNone(result)
-        self.assertEqual(len(result.values.keys()), 1)
+        self.assertEqual(len(result.values.keys()), 3)
         self.assertTrue("edge" in result.values)
 
     def test_create_edge_multi_transaction(self):
@@ -113,6 +143,7 @@ class TestEdges(MemoryTestCase):
 
         self.assertIsNotNone(result)
         self.assertTrue(isinstance(src, Element))
+        self.assertEqual(len(result), 1)
 
         tr = TransactionWrite(self.memory.driver)
         trg = tr.create_node(NodeConst)
@@ -120,7 +151,7 @@ class TestEdges(MemoryTestCase):
         result = tr.run()
 
         self.assertIsNotNone(result)
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 2)
 
     def test_create_edge_multi_transaction_trg(self):
         tr = TransactionWrite(self.memory.driver)
@@ -131,6 +162,7 @@ class TestEdges(MemoryTestCase):
 
         self.assertIsNotNone(result)
         self.assertTrue(isinstance(trg, Element))
+        self.assertEqual(len(result), 1)
 
         tr = TransactionWrite(self.memory.driver)
         src = tr.create_node(NodeConst)
@@ -138,7 +170,7 @@ class TestEdges(MemoryTestCase):
         result = tr.run()
 
         self.assertIsNotNone(result)
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 2)
 
     def test_edge_to_edge(self):
 
@@ -153,6 +185,9 @@ class TestEdges(MemoryTestCase):
 
         self.assertIsNotNone(result)
         self.assertEqual(len(result), 5)
+
+
+class TestLinks(MemoryTestCase):
 
     def test_links(self):
         tr = TransactionWrite(self.memory.driver)

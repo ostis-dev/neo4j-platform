@@ -24,11 +24,11 @@ class TransactionWriteResult:
         return len(self.values)
 
     def __repr__(self) -> str:
-        return "values_num: {}, run_time: {} ms, consume_time: {} ms".format(
-            len(self.values.keys()),
-            self.run_time,
-            self.consume_time
-        )
+        return (f"{self.__class__.__name__}("
+                f"values_num: {len(self.values.keys())}, "
+                f"run_time: {self.run_time} ms, "
+                f"consume_time: {self.consume_time} ms, "
+                f"items: {self.values})")
 
 
 class TransactionWrite:
@@ -50,7 +50,9 @@ class TransactionWrite:
 
     def _process_alias(self, alias: str, label: str, prefix="el"):
         if alias is None:
-            return f"{prefix}_{self._next_id()}"
+            alias = f"{prefix}_{self._next_id()}"
+            self._results[alias] = label
+            return alias
 
         if alias in self._results:
             raise KeyError(f"Alias {alias} already exist")
@@ -177,15 +179,15 @@ class TransactionWrite:
         if len(create_nodes) > 0:
             create_params = create_nodes
 
-        if len(create_edges) > 0:
-            if len(create_params) > 0:
-                create_params += ", "
-            create_params += create_sockets + ", " + create_edges
-
         if len(create_links) > 0:
             if len(create_params) > 0:
                 create_params += ","
             create_params += create_links
+
+        if len(create_edges) > 0:
+            if len(create_params) > 0:
+                create_params += ", "
+            create_params += create_sockets + ", " + create_edges
 
         if len(create_params) > 0:
             query += "\nCREATE " + create_params
@@ -228,11 +230,10 @@ class TransactionWrite:
             return None
 
         query = self._make_query()
-        # print(query)
         with self.driver.session() as session:
             return session.write_transaction(TransactionWrite._run_impl, query, self._results)
 
-    @neo4j.unit_of_work(timeout=30)
+    @ neo4j.unit_of_work(timeout=30)
     def _run_impl(tx: neo4j.Transaction, query, results):
         try:
             query_res = tx.run(query)

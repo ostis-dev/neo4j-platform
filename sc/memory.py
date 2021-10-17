@@ -1,7 +1,6 @@
-from sc.core.transaction.names import TransactionNamesWrite, TransactionNamesRead
 from sc.core.client import Client
 from sc.core.config import Config
-from sc.core.transaction import TransactionWrite, TransactionRead
+from sc.core.transaction import TransactionWrite, TransactionRead, TransactionNamesWrite, TransactionNamesRead
 
 import neo4j
 
@@ -25,3 +24,15 @@ class Memory:
     @property
     def client(self) -> Client:
         return self._client
+
+    def create_transaction_read(self) -> TransactionRead:
+        return TransactionRead(self.driver)
+
+    def create_transaction_write(self) -> TransactionWrite:
+        return TransactionWrite(self.driver)
+
+    def create_transaction_names_read(self) -> TransactionNamesRead:
+        return TransactionNamesRead(self.driver)
+
+    def create_transaction_names_write(self) -> TransactionNamesWrite:
+        return TransactionNamesWrite(self.driver)

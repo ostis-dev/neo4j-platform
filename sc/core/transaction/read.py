@@ -8,6 +8,8 @@ from sc.core.transaction.utils import _parse_output_element, _get_label_from_typ
 from enum import Enum
 from typing import Union, Tuple
 
+from sc.core.types import BaseType
+
 
 class FixedParameter:
 
@@ -35,20 +37,20 @@ class FixedParameter:
 
 class AssignParameter:
 
-    def __init__(self, label: str, alias: str = None):
-        self._label = label
+    def __init__(self, type: BaseType, alias: str = None):
+        self._type = type
         self._alias = alias
 
     @property
-    def label(self):
-        return self._label
+    def type(self):
+        return self._type
 
     @property
     def alias(self):
         return self._alias
 
     def __repr__(self) -> str:
-        return f'FixedParameter(label: {self.label}, alias: {self.alias})'
+        return f'FixedParameter(label: {self.type}, alias: {self.alias})'
 
 
 class TransactionReadResult:
@@ -65,6 +67,9 @@ class TransactionReadResult:
 
         def __repr__(self) -> str:
             return f'Item({self._values})'
+
+        def __iter__(self):
+            return iter(self._values)
 
     def __init__(self, result_summary: neo4j.ResultSummary):
         self.items = []
@@ -122,8 +127,6 @@ class TransactionRead:
             except KeyError:
                 if alias is None:
                     alias = f'f_{len(self._id_to_alias)}'
-                else:
-                    self._result.add(alias)
 
                 self._id_to_alias[element.id.full_id] = (alias, element.id)
 
@@ -139,6 +142,7 @@ class TransactionRead:
 
         assert result_alias is not None
         self._aliases.add(result_alias)
+        self._result.add(result_alias)
         return result_alias
 
     def _check_alias_exists(self, alias):
@@ -168,8 +172,8 @@ class TransactionRead:
 
         self._triples.append((
             TransactionRead.TripleType.FAA, source_alias,
-            (edge_alias, edge.label),
-            (target_alias, target.label)))
+            (edge_alias, edge.type),
+            (target_alias, target.type)))
 
         return (source_alias, edge_alias, target_alias)
 
@@ -190,8 +194,8 @@ class TransactionRead:
 
         self._triples.append((
             TransactionRead.TripleType.AAF,
-            (source_alias, source.label),
-            (edge_alias, edge.label),
+            (source_alias, source.type),
+            (edge_alias, edge.type),
             target))
 
         return (source_alias, edge_alias, target_alias)
@@ -213,9 +217,9 @@ class TransactionRead:
 
         self._triples.append((
             TransactionRead.TripleType.AFA,
-            (source_alias, source.label),
+            (source_alias, source.type),
             edge_alias,
-            (target_alias, target.label)))
+            (target_alias, target.type)))
 
         return (source_alias, edge_alias, target_alias)
 
@@ -245,7 +249,7 @@ class TransactionRead:
         self._triples.append((
             TransactionRead.TripleType.FAF,
             source_alias,
-            (edge_alias, edge.label),
+            (edge_alias, edge.type),
             target_alias))
 
         return (source_alias, edge_alias, target_alias)
