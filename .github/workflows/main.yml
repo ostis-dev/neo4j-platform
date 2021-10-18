@@ -40,5 +40,5 @@ jobs:
 
       - name: Run tests
         id: run_tests
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/db
         run: ./scripts/ci/make_config.sh "config.ini" "${{ secrets.NEO4J_PASSWORD }}" && ./scripts/ci/run_tests.sh
