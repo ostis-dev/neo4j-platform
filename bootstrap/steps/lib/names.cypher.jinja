@@ -1,0 +1,26 @@
+{% import 'lib/types.cypher.jinja' as types with context %}
+
+{% macro find_sys_idtf_rel(found_name) -%}
+MATCH 
+  (link_{{found_name}}:{{Labels.SC_LINK}} { {{ types.link_const_attrs() }} })
+      <-[edge_{{found_name}}:{{Labels.SC_ARC}} { {{ types.const_attr(TypeConst.CONST) }} }]-
+        ({{found_name}}:{{Labels.SC_NODE}}),
+  ({{found_name}})
+      -[:{{Labels.SC_ARC}} { {{ types.arc_member_const_pos_perm() }} }]->
+        (edge_sock_{{found_name}})
+WHERE 
+  (link_{{found_name}}.content = '{{Keynodes.NREL_SYS_IDTF}}') AND
+  edge_sock_{{found_name}}.edge_id = id(edge_{{found_name}})
+{%- endmacro %}
+
+{% macro set_sys_idtf(node, idtf, rel_node) -%}
+CREATE 
+  ({{node}})
+    -[edge_{{idtf}}:{{Labels.SC_ARC}} { {{ types.const_attr(TypeConst.CONST) }} }]->
+      (link:{{Labels.SC_LINK}} {content: "{{idtf}}", is_url: false, type: "str", {{ types.link_const_attrs() }} })
+WITH edge_{{idtf}}, {{rel_node}}
+CREATE
+  ({{rel_node}})
+      -[:{{Labels.SC_ARC}} { {{ types.arc_member_const_pos_perm() }} }]->
+        (:{{Labels.SC_EDGE_SOCK}} {edge_id: id(edge_{{idtf}})})
+{%- endmacro %}
