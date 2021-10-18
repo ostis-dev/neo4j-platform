@@ -6,13 +6,17 @@ from neo4j.work.result import Result
 class Client:
 
     def __init__(self, uri, user, password):
-        self.driver = GraphDatabase.driver(uri, auth=(user, password))
+        self._driver = GraphDatabase.driver(uri, auth=(user, password))
+
+    @property
+    def driver(self) -> neo4j.Neo4jDriver:
+        return self._driver
 
     def close(self):
-        self.driver.close()
+        self._driver.close()
 
     def list_databases(self):
-        with self.driver.session() as session:
+        with self._driver.session() as session:
             return session.read_transaction(Client._list_db)
 
     def has_db(self, db):
