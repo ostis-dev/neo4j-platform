@@ -1,0 +1,46 @@
+name: Testing
+
+on:
+  pull_request:
+    branches: [main]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  run_tests:
+    name: Testing
+    runs-on: ubuntu-latest
+
+    services:
+      neo4j:
+        image: neo4j
+        env:
+          NEO4J_dbms_connector_bolt_enabled: "true"
+          NEO4J_dbms_security_auth__enabled: "false"
+          NEO4J_AUTH: neo4j/${{ secrets.NEO4J_PASSWORD }}
+        # wait neo4j docker started
+        options: >-
+          --health-cmd "cypher-shell 'match (n) return count(n)'"
+          --health-timeout 10s
+          --health-retries 10
+          --health-interval 10s
+          --health-start-period 30s
+        ports:
+          - 7687:7687
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        id: install_dependencies
+        working-directory: ${{ github.workspace }}
+        run: pip3 install -r packages.txt
+
+      - name: Run tests
+        id: run_tests
+        working-directory: ${{ github.workspace }}
+        run: ./scripts/ci/make_config.sh "config.ini" "${{ secrets.NEO4J_PASSWORD }}" && ./scripts/ci/run_tests.sh

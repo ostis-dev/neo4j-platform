@@ -1,0 +1,47 @@
+{# Const #}
+{% macro const_attr(val) -%}
+{{ TypeAttrs.CONST }}: "{{ val }}"
+{%- endmacro %}
+
+{% macro node_struct_attr(val) -%}
+{{ TypeAttrs.NODE_STRUCT }}: "{{ val }}"
+{%- endmacro %}
+
+{# ArcPos #}
+{% macro arc_pos_attr(val) -%}
+{{ TypeAttrs.ARC_POS }}: "{{ val }}"
+{%- endmacro %}
+
+{% macro arc_perm_attr(val) -%}
+{{ TypeAttrs.ARC_PERM }}: "{{ val }}"
+{%- endmacro %}
+
+
+{# Nodes #}
+{% macro node_attrs(const, struct) -%}
+{{ const_attr(const) }}, {{ node_struct_attr(struct) }}
+{%- endmacro %}
+
+{% macro node_const_no_role_attrs() -%}
+{{ node_attrs(TypeConst.CONST, TypeNodeStruct.NO_ROLE) }}
+{%- endmacro %}
+
+{% macro node_const_class_attrs() -%}
+{{ node_attrs(TypeConst.CONST, TypeNodeStruct.CLASS) }}
+{%- endmacro %}
+
+{# Links #}
+{% macro link_const_attrs() -%}
+{{ const_attr(TypeConst.CONST) }}
+{%- endmacro %}
+
+{# #}
+
+{# Arcs #}
+{% macro arc_attrs(const, pos, perm) -%}
+{{ const_attr(const) }}, {{ arc_pos_attr(pos) }}, {{ arc_perm_attr(perm) }}
+{%- endmacro %}
+
+{% macro arc_member_const_pos_perm() -%}
+{{ arc_attrs(TypeConst.CONST, TypeArcPos.POS, TypeArcPerm.PERM) }}, {{ TypeAttrs.ARC_MEMBER }}: true
+{%- endmacro %}

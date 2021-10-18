@@ -32,6 +32,8 @@ def run(args):
 
     sorted_steps = sorted(steps, key=lambda x: x[0])
 
+    print(dir_path)
+
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(dir_path),
         autoescape=jinja2.select_autoescape())
