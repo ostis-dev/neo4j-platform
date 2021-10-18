@@ -7,6 +7,8 @@ import { createTheme, MuiThemeProvider } from '@material-ui/core';
 
 import * as store from './store';
 
+import { Loader } from './ui/loader';
+
 const css = require('./app.css');
 
 const theme = createTheme({
@@ -37,22 +39,11 @@ function mapStateToProps(state: store.Store): any {
 
 export class AppContainerImpl extends React.Component<AppContainerProps, any> {
 
-    private renderLoader(msg: string): React.ReactNode {
-        return (
-            <div className='loader-container'>
-                <div className='loader-vertical-center'>
-                    <div className='loader'></div>
-                    <div className='loader-text'>{msg}</div>
-                </div>
-            </div>
-        );
-    }
-
     render() {
 
         return (
             <MuiThemeProvider theme={theme}>
-
+                <Loader msg="Loading..."></Loader>
             </MuiThemeProvider>);
     }
 }
