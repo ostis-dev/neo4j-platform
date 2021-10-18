@@ -1,1 +1,1 @@
-python3 -m bootstrap --config config.ini
+python3 -m tools.bootstrap --config config.ini
