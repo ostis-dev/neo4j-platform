@@ -1,7 +1,9 @@
 import argparse
+
 from .app import App
 
-if __name__ == "__main__":
+
+def main():
     parser = argparse.ArgumentParser(
         description='Initialize database with core elements')
     parser.add_argument("--config", type=str, required=True,

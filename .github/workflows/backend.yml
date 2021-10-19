@@ -1,4 +1,4 @@
-name: Testing
+name: Backend
 
 on:
   pull_request:
@@ -38,7 +38,20 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: pip3 install -r packages.txt
 
-      - name: Run tests
-        id: run_tests
+      - name: Initialize database
+        id: initialize_db
         working-directory: ${{ github.workspace }}/db
-        run: ./scripts/ci/make_config.sh "config.ini" "${{ secrets.NEO4J_PASSWORD }}" && ./scripts/ci/run_tests.sh
+        run: |
+          ${{ github.workspace }}/db/scripts/ci/make_config.sh config.ini
+          ./scripts/run_bootstrap.sh
+
+      - name: Run service
+        id: run_tests
+        working-directory: ${{ github.workspace }}/web/backend
+        env:
+          CONFIG_PATH_TO_SC_CONFIG: db.ini
+          CONFIG_NEO4J_PASS: ${{ secrets.NEO4J_PASSWORD }}
+        run: |
+          ${{ github.workspace }}/db/scripts/ci/make_config.sh db.ini
+          ./scripts/ci/make_config.sh service.ini
+          ./scripts/ci/run_tests.sh service.ini

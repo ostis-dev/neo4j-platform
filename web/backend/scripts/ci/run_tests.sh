@@ -1,0 +1,1 @@
+python3 scripts/ci/run_service_delay.py --config $1

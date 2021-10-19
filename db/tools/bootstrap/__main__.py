@@ -42,7 +42,7 @@ def run(args):
 
     passed = True
     for name, file_name in sorted_steps:
-        step = Step(driver, env.get_template(name), memory.config)
+        step = Step(driver, env.get_template(name), memory._config)
 
         print("Run " + colored(name, "blue") + " ... ", end='')
         res = step.run()

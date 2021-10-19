@@ -9,5 +9,5 @@ echo "
 name = sc
 uri = bolt://localhost:7687
 user = neo4j
-password = $2
+password = ${CONFIG_NEO4J_PASS}
 " >> $1 
