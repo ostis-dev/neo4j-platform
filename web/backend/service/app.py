@@ -23,7 +23,12 @@ class App:
         try:
             application.listen(8888)
             tornado.ioloop.IOLoop.instance().start()
+            self._on_stop()
         except KeyboardInterrupt:
-            print("\nStopping service...")
-            self._memory.close()
-            tornado.ioloop.IOLoop.instance().stop()
+            print("Interrupted with keyboard...")
+            self._on_stop()
+
+    def _on_stop(self):
+        print("Stopping service...")
+        self._memory.close()
+        tornado.ioloop.IOLoop.instance().stop()
