@@ -1,3 +1,6 @@
 [tornado]
 # cookie secret in tornado
-cookie_secret = <random generated value>  
+cookie_secret = <random generated value>
+
+[sc]
+config = ../../db/config.ini

@@ -8,13 +8,16 @@ import neo4j
 class Memory:
 
     def __init__(self, config_path: str):
-        self.config = Config(config_path)
+        self._config = Config(config_path)
+
+        print(f"Connecting to {self._config.db_uri()}")
         self._client = Client(
-            self.config.db_uri(),
-            self.config.db_user(),
-            self.config.db_password())
+            self._config.db_uri(),
+            self._config.db_user(),
+            self._config.db_password())
 
     def close(self):
+        print(f"Close connection to {self._config.db_uri()}")
         self._client.close()
 
     @property
