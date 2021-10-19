@@ -3,7 +3,7 @@ from typing import List, Tuple
 import sc
 import os
 
-from bootstrap.step import Step
+from .step import Step
 from termcolor import colored
 
 import jinja2
