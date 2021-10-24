@@ -1,0 +1,1 @@
+java -jar $1 -Dlanguage=Python3 -o scs/parser -no-listener -no-visitor -Xexact-output-dir scs/scs.g4
