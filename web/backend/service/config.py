@@ -2,6 +2,7 @@ import configparser
 import os
 
 from typing import KeysView
+from secrets import token_hex
 
 
 class Config:
@@ -17,8 +18,15 @@ class Config:
         except KeyError:
             return default
 
-    def get_cookie_secret(self) -> str:
-        return self._get_safe_value("tornado", "cookie_secret", "")
+    def get_secret(self) -> str:
+        return self._get_safe_value("flask", "secret", token_hex(32))
+
+    def get_host(self) -> str:
+        return self._get_safe_value("flask", "host", "127.0.0.1")
+
+    def get_port(self) -> int:
+        return int(self._get_safe_value("flask", "port", "5000"))
+
 
     def get_path_to_sc_config(self) -> str:
         path = self._get_safe_value("sc", "config", "")

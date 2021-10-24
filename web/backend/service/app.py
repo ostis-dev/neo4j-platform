@@ -2,9 +2,6 @@ import logging
 
 import sc
 
-import tornado.ioloop
-import tornado.web
-
 from .config import Config
 
 
@@ -16,13 +13,12 @@ class App:
         self._memory = sc.Memory(self._config.get_path_to_sc_config())
 
     def run(self):
-        application = tornado.web.Application([
+        from flask import Flask
 
-        ], cookie_secret=self._config.get_cookie_secret())
+        app = Flask(__name__)
 
         try:
-            application.listen(8888)
-            tornado.ioloop.IOLoop.instance().start()
+            app.run(self._config.get_host(), self._config.get_port())
             self._on_stop()
         except KeyboardInterrupt:
             print("Interrupted with keyboard...")
@@ -31,4 +27,3 @@ class App:
     def _on_stop(self):
         print("Stopping service...")
         self._memory.close()
-        tornado.ioloop.IOLoop.instance().stop()
