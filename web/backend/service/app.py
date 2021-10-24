@@ -13,9 +13,11 @@ class App:
         self._memory = sc.Memory(self._config.get_path_to_sc_config())
 
     def run(self):
-        from flask import Flask
+        from .flask_app import init_app_from_config
+        from .flask_app.db import db
 
-        app = Flask(__name__)
+        app = init_app_from_config(self._config)
+        db.init_app(app)
 
         try:
             app.run(self._config.get_host(), self._config.get_port())
