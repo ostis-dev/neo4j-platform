@@ -4,13 +4,15 @@ content: ('_')? CONTENT_BODY;
 
 contour
 	@init {count = 1}:
-	CONTOUR_BEGIN { count > 0 }? (sentence_wrap*) CONTOUR_END {
+	CONTOUR_BEGIN {count > 0}? (sentence_wrap*) CONTOUR_END {
 count -= 1
 if count == 0:
     pass
     };
 
-connector: (
+connector
+	returns[str symbol]:
+	c = (
 		'<>'
 		| '>'
 		| '<'
@@ -51,7 +53,7 @@ connector: (
 		| '_<|~'
 		| '_~/>'
 		| '_</~'
-	);
+	) {$ctx.symbol = $c.text};
 
 // ------------- Rules --------------------
 

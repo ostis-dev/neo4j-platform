@@ -3,9 +3,10 @@ import antlr4
 from antlr4.error.ErrorListener import ErrorListener, ConsoleErrorListener
 
 from enum import Enum
-from typing import List
+from typing import List, Tuple
 
-from ._parser import SCsLexerImpl, SCsParserImpl
+from ._parser import SCsLexerAntlr, SCsParserAntlr
+from .parser_impl import SCsParserImpl, Triple, TripleElement
 
 
 class SCsParser:
@@ -48,11 +49,25 @@ class SCsParser:
 
     def __init__(self) -> None:
         self._error_listener = SCsParser.SyntaxErrorListener()
+        self._impl = SCsParserImpl()
 
     @property
     def errors(self) -> List[Error]:
         """Returns list of errors"""
         return self._error_listener.errors
+
+    @property
+    def triples(self) -> List[Triple]:
+        """Returns list of parsed triples in format (src, edge, trg)"""
+        return self._impl.triples
+
+    @property
+    def type_triples(self) -> List[Tuple]:
+        """Returns list of parsed type triples in format (src, edge, trg).
+
+        Source of each triple is a keynode that determines type of sc-element.
+        """
+        return self._impl.triples
 
     def parse(self, data: str) -> bool:
         """Runs SCs-text parsing from string `data`.
@@ -72,9 +87,10 @@ class SCsParser:
 
     def _parseImpl(self, stream: antlr4.InputStream) -> bool:
 
-        lexer = SCsLexerImpl(input=stream)
+        lexer = SCsLexerAntlr(input=stream)
         stream = antlr4.CommonTokenStream(lexer=lexer)
-        parser = SCsParserImpl(input=stream)
+        parser = SCsParserAntlr(input=stream)
+        parser._impl = self._impl
         parser.addErrorListener(self._error_listener)
         # do not print errors to console
         parser.removeErrorListener(ConsoleErrorListener.INSTANCE)
