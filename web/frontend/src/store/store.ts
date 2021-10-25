@@ -1,9 +1,13 @@
-import { User, _initUser } from './interfaces/user';
+import { services, user , errors} from './interfaces';
 
 export interface Store {
-    user: User,
+    user: user.User,
+    services: services.Services,
+    errors: errors.Errors
 }
 
 export const storeInitialState: Store = {
-    user: _initUser,
+    user: user._initUser,
+    services: services._initServices,
+    errors: errors._initErrors
 }
