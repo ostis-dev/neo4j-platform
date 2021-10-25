@@ -9,7 +9,7 @@ MATCH
       -[:{{Labels.SC_ARC}} { {{ types.arc_member_const_pos_perm() }} }]->
         (edge_sock_{{found_name}})
 WHERE 
-  (link_{{found_name}}.content = '{{Keynodes.NREL_SYS_IDTF}}') AND
+  (link_{{found_name}}.content = '{{KeynodeNames.NREL_SYS_IDTF}}') AND
   edge_sock_{{found_name}}.edge_id = id(edge_{{found_name}})
 {%- endmacro %}
 

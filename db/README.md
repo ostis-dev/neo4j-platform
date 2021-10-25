@@ -4,6 +4,10 @@
 
 - Create configuration file `config.ini`. See [config.ini](db/config.ini)
 
+## Codestlye
+
+- Please style your code aacording to [PEP8](https://www.python.org/dev/peps/pep-0008/) rules
+
 ## Regenerate ANTLR parser
 
 - [Download](https://www.antlr.org/download.html) antlr generator.

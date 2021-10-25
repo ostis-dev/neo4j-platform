@@ -1,7 +1,7 @@
 {% import 'lib/types.cypher.jinja' as types with context %}
 
 CREATE 
-  (link:{{Labels.SC_LINK}} {content: "{{Keynodes.NREL_SYS_IDTF}}", is_url: false, type: "str", {{ types.const_attr(TypeConst.CONST) }} }),
+  (link:{{Labels.SC_LINK}} {content: "{{KeynodeNames.NREL_SYS_IDTF}}", is_url: false, type: "str", {{ types.const_attr(TypeConst.CONST) }} }),
   (node:{{Labels.SC_NODE}} { {{ types.node_const_no_role_attrs() }} }),
   (node)-[edge:{{Labels.SC_ARC}} { {{ types.const_attr(TypeConst.CONST) }} }]->(link)
 WITH edge, node

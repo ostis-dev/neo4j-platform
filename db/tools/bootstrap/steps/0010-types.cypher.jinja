@@ -1,13 +1,11 @@
 {% import 'lib/names.cypher.jinja' as names with context %}
 {% import 'lib/types.cypher.jinja' as types with context %}
 
-{% set keynodes_list = [
-  'sc_node', 'sc_link', 'sc_edge', 'sc_arc', 'sc_arc_member',
-  'sc_const', 'sc_var',
-  'sc_node_struct', 'sc_node_tuple', 'sc_node_role', 'sc_node_no_role', 'sc_node_class', 'sc_node_abstract', 'sc_node_material',
-  'sc_edge_perm', 'sc_edge_temp',
-  'sc_edge_pos', 'sc_edge_neg', 'sc_edge_fuz'
-  ]%}
+{% set keynodes_list = KeynodeNames.CORE_TYPES
+    + KeynodeNames.CONST_TYPES
+    + KeynodeNames.NODE_TYPES
+    + KeynodeNames.ARC_PERM_TYPES
+    + KeynodeNames.ARC_POS_TYPES %}
 
 {# find system identifier keynode #}
 {{ names.find_sys_idtf_rel(found_name="found_nrel_sys_idtf") }}
