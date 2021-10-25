@@ -4,9 +4,10 @@ from flask import Flask
 
 if TYPE_CHECKING:
     from ..config import Config
+    from sc import Memory
 
 
-def create_app(config: 'Config') -> Flask:
+def create_app(config: "Config", memory: "Memory") -> Flask:
     app = Flask(__name__)
 
     from datetime import timedelta
@@ -47,6 +48,57 @@ def create_app(config: 'Config') -> Flask:
     @app.route("/")
     def hello_world():
         return jsonify({"message": "Hello World!"})
+
+    from sc.core.transaction import TransactionWrite, TransactionNamesRead
+    from sc.core.types import (
+        NodeType,
+        ArcType,
+        LinkType,
+        TypeArcPos,
+        TypeConst,
+        TypeArcPerm,
+    )
+
+    NodeConst = NodeType(const=TypeConst.CONST)
+    LinkConst = LinkType(const=TypeConst.CONST)
+    ArcMemberConstPosPerm = ArcType(
+        const=TypeConst.CONST,
+        arc_pos=TypeArcPos.POS,
+        arc_perm=TypeArcPerm.PERM,
+        is_member=True,
+    )
+    ArcNoMemberConstPosPerm = ArcType(
+        const=TypeConst.CONST,
+        arc_pos=TypeArcPos.POS,
+        arc_perm=TypeArcPerm.PERM,
+        is_member=False,
+    )
+
+    @app.route("/memory_test")
+    def test_memory():
+        tr = TransactionNamesRead(memory.driver)
+        user = tr.resolve_by_system_identifier("user")
+        result = tr.run()
+
+        try:
+            user = result[user]
+        except KeyError:
+            tr = TransactionWrite(memory.driver)
+            user = tr.create_node(NodeConst, alias="user")
+            result = tr.run()
+            user = result[user]
+
+        tr = TransactionWrite(memory.driver)
+        user_instance = tr.create_node(NodeConst, alias="user_instance")
+        _ = tr.create_edge(user, user_instance, ArcMemberConstPosPerm)
+        link = tr.create_link_with_content(LinkConst, content=f"{1}", is_url=False)
+        edge = tr.create_edge(user_instance, link, ArcNoMemberConstPosPerm)
+        nrel_user_id = tr.create_node(NodeConst, alias="nrel_user_id")
+        _ = tr.create_edge(nrel_user_id, edge, ArcMemberConstPosPerm)
+        result = tr.run()
+        print(result[user_instance])
+
+        return jsonify({})
 
     @app.route("/jwt_test")
     @jwt_required()

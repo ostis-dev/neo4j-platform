@@ -15,7 +15,7 @@ class App:
     def run(self):
         from .flask_app import create_app
 
-        app = create_app(self._config)
+        app = create_app(self._config, self._memory)
 
         try:
             app.run(self._config.get_host(), self._config.get_port())
