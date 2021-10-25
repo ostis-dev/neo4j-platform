@@ -1,13 +1,13 @@
-
 import * as React from 'react';
 
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import { createTheme, MuiThemeProvider } from '@material-ui/core';
+import {connect} from 'react-redux';
+import {withRouter} from 'react-router-dom';
+import {createTheme, MuiThemeProvider} from '@material-ui/core';
 
 import * as store from './store';
 
-import { Loader } from './ui/loader';
+import {AppMain} from './ui/AppMain';
+import {AppHeader} from './ui/AppHeader';
 
 const css = require('./app.css');
 
@@ -38,12 +38,12 @@ function mapStateToProps(state: store.Store): any {
 }
 
 export class AppContainerImpl extends React.Component<AppContainerProps, any> {
-
     render() {
 
         return (
             <MuiThemeProvider theme={theme}>
-                <Loader msg="Loading..."></Loader>
+                <AppHeader/>
+                <AppMain/>
             </MuiThemeProvider>);
     }
 }
