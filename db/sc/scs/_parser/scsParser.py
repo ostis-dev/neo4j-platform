@@ -1108,9 +1108,7 @@ class scsParser ( Parser ):
 
         localctx = scsParser.ContentContext(self, self._ctx, self.state)
         self.enterRule(localctx, 32, self.RULE_content)
-
-                count = 1
-            
+        count = 1
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
@@ -1148,12 +1146,12 @@ class scsParser ( Parser ):
                     elif token in [scsParser.T__57]:
                         self.state = 159
                         self.match(scsParser.T__57)
-                         count += 1 
+                        count += 1
                         pass
                     elif token in [scsParser.T__58]:
                         self.state = 161
                         self.match(scsParser.T__58)
-                         count -= 1 
+                        count -= 1
                         pass
                     else:
                         raise NoViableAltException(self)
