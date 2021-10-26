@@ -71,9 +71,17 @@ sentence_assign: ALIAS_SYMBOLS '=' idtf_common;
 
 idtf_lvl1_preffix: 'sc_node' | 'sc_link' | 'sc_edge' | 'sc_arc';
 
-idtf_lvl1_value: idtf_lvl1_preffix '#' ID_SYSTEM;
+idtf_lvl1_value
+	returns[Element el]:
+	t = idtf_lvl1_preffix '#' i = ID_SYSTEM {
+$ctx.el = self._impl._processIdtfLevel1($t.text, $i.text)
+};
 
-idtf_lvl1: idtf_lvl1_value;
+idtf_lvl1
+	returns[Element el]:
+	idtf_lvl1_value {
+$ctx.el = $idtf_lvl1_value.el
+};
 
 idtf_edge: '(' idtf_atomic connector attr_list? idtf_atomic ')';
 
@@ -101,7 +109,10 @@ internal_sentence: connector attr_list? idtf_list;
 
 internal_sentence_list: '(*' (internal_sentence ';;')+ '*)';
 
-sentence_lvl1: idtf_lvl1 '|' idtf_lvl1 '|' idtf_lvl1;
+sentence_lvl1:
+	src = idtf_lvl1 '|' edge = idtf_lvl1 '|' trg = idtf_lvl1 {
+self._impl.append_triple($src.el, $edge.el, $trg.el)
+};
 
 sentence_lvl_4_list_item: connector attr_list? idtf_list;
 

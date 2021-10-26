@@ -12,7 +12,7 @@ else:
 def serializedATN():
     with StringIO() as buf:
         buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3F")
-        buf.write("\u00ca\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\u00cd\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
         buf.write("\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31")
@@ -20,76 +20,78 @@ def serializedATN():
         buf.write("\16\3>\13\3\3\3\3\3\3\3\3\4\3\4\3\4\3\5\7\5G\n\5\f\5\16")
         buf.write("\5J\13\5\3\5\3\5\3\6\3\6\3\6\3\7\3\7\3\7\5\7T\n\7\3\b")
         buf.write("\3\b\3\t\3\t\3\t\5\t[\n\t\3\n\3\n\3\n\3\n\3\13\3\13\3")
-        buf.write("\f\3\f\3\f\3\f\3\r\3\r\3\16\3\16\3\16\3\16\5\16m\n\16")
-        buf.write("\3\16\3\16\3\16\3\17\3\17\5\17t\n\17\3\17\3\17\3\17\5")
-        buf.write("\17y\n\17\3\17\7\17|\n\17\f\17\16\17\177\13\17\3\17\3")
-        buf.write("\17\3\20\3\20\5\20\u0085\n\20\3\21\3\21\3\22\3\22\3\22")
-        buf.write("\3\22\3\22\3\22\5\22\u008f\n\22\3\23\3\23\5\23\u0093\n")
-        buf.write("\23\3\23\3\23\3\23\5\23\u0098\n\23\7\23\u009a\n\23\f\23")
-        buf.write("\16\23\u009d\13\23\3\24\3\24\5\24\u00a1\n\24\3\24\3\24")
-        buf.write("\3\25\3\25\3\25\3\25\6\25\u00a9\n\25\r\25\16\25\u00aa")
-        buf.write("\3\25\3\25\3\26\3\26\3\26\3\26\3\26\3\26\3\27\3\27\5\27")
-        buf.write("\u00b7\n\27\3\27\3\27\3\30\3\30\3\30\3\30\7\30\u00bf\n")
-        buf.write("\30\f\30\16\30\u00c2\13\30\3\31\3\31\6\31\u00c6\n\31\r")
-        buf.write("\31\16\31\u00c7\3\31\2\2\32\2\4\6\b\n\f\16\20\22\24\26")
-        buf.write("\30\32\34\36 \"$&(*,.\60\2\4\3\2\4+\3\2/\62\2\u00ca\2")
-        buf.write("\63\3\2\2\2\4\67\3\2\2\2\6B\3\2\2\2\bH\3\2\2\2\nM\3\2")
-        buf.write("\2\2\fS\3\2\2\2\16U\3\2\2\2\20Z\3\2\2\2\22\\\3\2\2\2\24")
-        buf.write("`\3\2\2\2\26b\3\2\2\2\30f\3\2\2\2\32h\3\2\2\2\34q\3\2")
-        buf.write("\2\2\36\u0084\3\2\2\2 \u0086\3\2\2\2\"\u008e\3\2\2\2$")
-        buf.write("\u0090\3\2\2\2&\u009e\3\2\2\2(\u00a4\3\2\2\2*\u00ae\3")
-        buf.write("\2\2\2,\u00b4\3\2\2\2.\u00ba\3\2\2\2\60\u00c5\3\2\2\2")
-        buf.write("\62\64\7\3\2\2\63\62\3\2\2\2\63\64\3\2\2\2\64\65\3\2\2")
-        buf.write("\2\65\66\7@\2\2\66\3\3\2\2\2\678\7>\2\28<\6\3\2\29;\5")
-        buf.write("\n\6\2:9\3\2\2\2;>\3\2\2\2<:\3\2\2\2<=\3\2\2\2=?\3\2\2")
-        buf.write("\2><\3\2\2\2?@\7?\2\2@A\b\3\1\2A\5\3\2\2\2BC\t\2\2\2C")
-        buf.write("D\b\4\1\2D\7\3\2\2\2EG\5\n\6\2FE\3\2\2\2GJ\3\2\2\2HF\3")
-        buf.write("\2\2\2HI\3\2\2\2IK\3\2\2\2JH\3\2\2\2KL\7\2\2\3L\t\3\2")
-        buf.write("\2\2MN\5\f\7\2NO\7,\2\2O\13\3\2\2\2PT\5*\26\2QT\5\22\n")
-        buf.write("\2RT\5.\30\2SP\3\2\2\2SQ\3\2\2\2SR\3\2\2\2T\r\3\2\2\2")
-        buf.write("UV\7=\2\2V\17\3\2\2\2W[\7<\2\2X[\7-\2\2Y[\5\24\13\2ZW")
-        buf.write("\3\2\2\2ZX\3\2\2\2ZY\3\2\2\2[\21\3\2\2\2\\]\7=\2\2]^\7")
-        buf.write(".\2\2^_\5\"\22\2_\23\3\2\2\2`a\t\3\2\2a\25\3\2\2\2bc\5")
-        buf.write("\24\13\2cd\7\63\2\2de\7<\2\2e\27\3\2\2\2fg\5\26\f\2g\31")
-        buf.write("\3\2\2\2hi\7\64\2\2ij\5\36\20\2jl\5\6\4\2km\5\60\31\2")
-        buf.write("lk\3\2\2\2lm\3\2\2\2mn\3\2\2\2no\5\36\20\2op\7\65\2\2")
-        buf.write("p\33\3\2\2\2qs\7\66\2\2rt\5\60\31\2sr\3\2\2\2st\3\2\2")
-        buf.write("\2tu\3\2\2\2u}\5\"\22\2vx\7\67\2\2wy\5\60\31\2xw\3\2\2")
-        buf.write("\2xy\3\2\2\2yz\3\2\2\2z|\5\"\22\2{v\3\2\2\2|\177\3\2\2")
-        buf.write("\2}{\3\2\2\2}~\3\2\2\2~\u0080\3\2\2\2\177}\3\2\2\2\u0080")
-        buf.write("\u0081\78\2\2\u0081\35\3\2\2\2\u0082\u0085\5\16\b\2\u0083")
-        buf.write("\u0085\5\20\t\2\u0084\u0082\3\2\2\2\u0084\u0083\3\2\2")
-        buf.write("\2\u0085\37\3\2\2\2\u0086\u0087\7A\2\2\u0087!\3\2\2\2")
-        buf.write("\u0088\u008f\5\36\20\2\u0089\u008f\5\32\16\2\u008a\u008f")
-        buf.write("\5\34\17\2\u008b\u008f\5\4\3\2\u008c\u008f\5\2\2\2\u008d")
-        buf.write("\u008f\5 \21\2\u008e\u0088\3\2\2\2\u008e\u0089\3\2\2\2")
-        buf.write("\u008e\u008a\3\2\2\2\u008e\u008b\3\2\2\2\u008e\u008c\3")
-        buf.write("\2\2\2\u008e\u008d\3\2\2\2\u008f#\3\2\2\2\u0090\u0092")
-        buf.write("\5\"\22\2\u0091\u0093\5(\25\2\u0092\u0091\3\2\2\2\u0092")
-        buf.write("\u0093\3\2\2\2\u0093\u009b\3\2\2\2\u0094\u0095\7\67\2")
-        buf.write("\2\u0095\u0097\5\"\22\2\u0096\u0098\5(\25\2\u0097\u0096")
-        buf.write("\3\2\2\2\u0097\u0098\3\2\2\2\u0098\u009a\3\2\2\2\u0099")
-        buf.write("\u0094\3\2\2\2\u009a\u009d\3\2\2\2\u009b\u0099\3\2\2\2")
-        buf.write("\u009b\u009c\3\2\2\2\u009c%\3\2\2\2\u009d\u009b\3\2\2")
-        buf.write("\2\u009e\u00a0\5\6\4\2\u009f\u00a1\5\60\31\2\u00a0\u009f")
-        buf.write("\3\2\2\2\u00a0\u00a1\3\2\2\2\u00a1\u00a2\3\2\2\2\u00a2")
-        buf.write("\u00a3\5$\23\2\u00a3\'\3\2\2\2\u00a4\u00a8\79\2\2\u00a5")
-        buf.write("\u00a6\5&\24\2\u00a6\u00a7\7,\2\2\u00a7\u00a9\3\2\2\2")
-        buf.write("\u00a8\u00a5\3\2\2\2\u00a9\u00aa\3\2\2\2\u00aa\u00a8\3")
-        buf.write("\2\2\2\u00aa\u00ab\3\2\2\2\u00ab\u00ac\3\2\2\2\u00ac\u00ad")
-        buf.write("\7:\2\2\u00ad)\3\2\2\2\u00ae\u00af\5\30\r\2\u00af\u00b0")
-        buf.write("\7;\2\2\u00b0\u00b1\5\30\r\2\u00b1\u00b2\7;\2\2\u00b2")
-        buf.write("\u00b3\5\30\r\2\u00b3+\3\2\2\2\u00b4\u00b6\5\6\4\2\u00b5")
-        buf.write("\u00b7\5\60\31\2\u00b6\u00b5\3\2\2\2\u00b6\u00b7\3\2\2")
-        buf.write("\2\u00b7\u00b8\3\2\2\2\u00b8\u00b9\5$\23\2\u00b9-\3\2")
-        buf.write("\2\2\u00ba\u00bb\5\"\22\2\u00bb\u00c0\5,\27\2\u00bc\u00bd")
-        buf.write("\7\67\2\2\u00bd\u00bf\5,\27\2\u00be\u00bc\3\2\2\2\u00bf")
-        buf.write("\u00c2\3\2\2\2\u00c0\u00be\3\2\2\2\u00c0\u00c1\3\2\2\2")
-        buf.write("\u00c1/\3\2\2\2\u00c2\u00c0\3\2\2\2\u00c3\u00c4\7<\2\2")
-        buf.write("\u00c4\u00c6\7B\2\2\u00c5\u00c3\3\2\2\2\u00c6\u00c7\3")
-        buf.write("\2\2\2\u00c7\u00c5\3\2\2\2\u00c7\u00c8\3\2\2\2\u00c8\61")
-        buf.write("\3\2\2\2\25\63<HSZlsx}\u0084\u008e\u0092\u0097\u009b\u00a0")
-        buf.write("\u00aa\u00b6\u00c0\u00c7")
+        buf.write("\f\3\f\3\f\3\f\3\f\3\r\3\r\3\r\3\16\3\16\3\16\3\16\5\16")
+        buf.write("o\n\16\3\16\3\16\3\16\3\17\3\17\5\17v\n\17\3\17\3\17\3")
+        buf.write("\17\5\17{\n\17\3\17\7\17~\n\17\f\17\16\17\u0081\13\17")
+        buf.write("\3\17\3\17\3\20\3\20\5\20\u0087\n\20\3\21\3\21\3\22\3")
+        buf.write("\22\3\22\3\22\3\22\3\22\5\22\u0091\n\22\3\23\3\23\5\23")
+        buf.write("\u0095\n\23\3\23\3\23\3\23\5\23\u009a\n\23\7\23\u009c")
+        buf.write("\n\23\f\23\16\23\u009f\13\23\3\24\3\24\5\24\u00a3\n\24")
+        buf.write("\3\24\3\24\3\25\3\25\3\25\3\25\6\25\u00ab\n\25\r\25\16")
+        buf.write("\25\u00ac\3\25\3\25\3\26\3\26\3\26\3\26\3\26\3\26\3\26")
+        buf.write("\3\27\3\27\5\27\u00ba\n\27\3\27\3\27\3\30\3\30\3\30\3")
+        buf.write("\30\7\30\u00c2\n\30\f\30\16\30\u00c5\13\30\3\31\3\31\6")
+        buf.write("\31\u00c9\n\31\r\31\16\31\u00ca\3\31\2\2\32\2\4\6\b\n")
+        buf.write("\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\2\4\3\2\4+\3")
+        buf.write("\2/\62\2\u00cd\2\63\3\2\2\2\4\67\3\2\2\2\6B\3\2\2\2\b")
+        buf.write("H\3\2\2\2\nM\3\2\2\2\fS\3\2\2\2\16U\3\2\2\2\20Z\3\2\2")
+        buf.write("\2\22\\\3\2\2\2\24`\3\2\2\2\26b\3\2\2\2\30g\3\2\2\2\32")
+        buf.write("j\3\2\2\2\34s\3\2\2\2\36\u0086\3\2\2\2 \u0088\3\2\2\2")
+        buf.write("\"\u0090\3\2\2\2$\u0092\3\2\2\2&\u00a0\3\2\2\2(\u00a6")
+        buf.write("\3\2\2\2*\u00b0\3\2\2\2,\u00b7\3\2\2\2.\u00bd\3\2\2\2")
+        buf.write("\60\u00c8\3\2\2\2\62\64\7\3\2\2\63\62\3\2\2\2\63\64\3")
+        buf.write("\2\2\2\64\65\3\2\2\2\65\66\7@\2\2\66\3\3\2\2\2\678\7>")
+        buf.write("\2\28<\6\3\2\29;\5\n\6\2:9\3\2\2\2;>\3\2\2\2<:\3\2\2\2")
+        buf.write("<=\3\2\2\2=?\3\2\2\2><\3\2\2\2?@\7?\2\2@A\b\3\1\2A\5\3")
+        buf.write("\2\2\2BC\t\2\2\2CD\b\4\1\2D\7\3\2\2\2EG\5\n\6\2FE\3\2")
+        buf.write("\2\2GJ\3\2\2\2HF\3\2\2\2HI\3\2\2\2IK\3\2\2\2JH\3\2\2\2")
+        buf.write("KL\7\2\2\3L\t\3\2\2\2MN\5\f\7\2NO\7,\2\2O\13\3\2\2\2P")
+        buf.write("T\5*\26\2QT\5\22\n\2RT\5.\30\2SP\3\2\2\2SQ\3\2\2\2SR\3")
+        buf.write("\2\2\2T\r\3\2\2\2UV\7=\2\2V\17\3\2\2\2W[\7<\2\2X[\7-\2")
+        buf.write("\2Y[\5\24\13\2ZW\3\2\2\2ZX\3\2\2\2ZY\3\2\2\2[\21\3\2\2")
+        buf.write("\2\\]\7=\2\2]^\7.\2\2^_\5\"\22\2_\23\3\2\2\2`a\t\3\2\2")
+        buf.write("a\25\3\2\2\2bc\5\24\13\2cd\7\63\2\2de\7<\2\2ef\b\f\1\2")
+        buf.write("f\27\3\2\2\2gh\5\26\f\2hi\b\r\1\2i\31\3\2\2\2jk\7\64\2")
+        buf.write("\2kl\5\36\20\2ln\5\6\4\2mo\5\60\31\2nm\3\2\2\2no\3\2\2")
+        buf.write("\2op\3\2\2\2pq\5\36\20\2qr\7\65\2\2r\33\3\2\2\2su\7\66")
+        buf.write("\2\2tv\5\60\31\2ut\3\2\2\2uv\3\2\2\2vw\3\2\2\2w\177\5")
+        buf.write("\"\22\2xz\7\67\2\2y{\5\60\31\2zy\3\2\2\2z{\3\2\2\2{|\3")
+        buf.write("\2\2\2|~\5\"\22\2}x\3\2\2\2~\u0081\3\2\2\2\177}\3\2\2")
+        buf.write("\2\177\u0080\3\2\2\2\u0080\u0082\3\2\2\2\u0081\177\3\2")
+        buf.write("\2\2\u0082\u0083\78\2\2\u0083\35\3\2\2\2\u0084\u0087\5")
+        buf.write("\16\b\2\u0085\u0087\5\20\t\2\u0086\u0084\3\2\2\2\u0086")
+        buf.write("\u0085\3\2\2\2\u0087\37\3\2\2\2\u0088\u0089\7A\2\2\u0089")
+        buf.write("!\3\2\2\2\u008a\u0091\5\36\20\2\u008b\u0091\5\32\16\2")
+        buf.write("\u008c\u0091\5\34\17\2\u008d\u0091\5\4\3\2\u008e\u0091")
+        buf.write("\5\2\2\2\u008f\u0091\5 \21\2\u0090\u008a\3\2\2\2\u0090")
+        buf.write("\u008b\3\2\2\2\u0090\u008c\3\2\2\2\u0090\u008d\3\2\2\2")
+        buf.write("\u0090\u008e\3\2\2\2\u0090\u008f\3\2\2\2\u0091#\3\2\2")
+        buf.write("\2\u0092\u0094\5\"\22\2\u0093\u0095\5(\25\2\u0094\u0093")
+        buf.write("\3\2\2\2\u0094\u0095\3\2\2\2\u0095\u009d\3\2\2\2\u0096")
+        buf.write("\u0097\7\67\2\2\u0097\u0099\5\"\22\2\u0098\u009a\5(\25")
+        buf.write("\2\u0099\u0098\3\2\2\2\u0099\u009a\3\2\2\2\u009a\u009c")
+        buf.write("\3\2\2\2\u009b\u0096\3\2\2\2\u009c\u009f\3\2\2\2\u009d")
+        buf.write("\u009b\3\2\2\2\u009d\u009e\3\2\2\2\u009e%\3\2\2\2\u009f")
+        buf.write("\u009d\3\2\2\2\u00a0\u00a2\5\6\4\2\u00a1\u00a3\5\60\31")
+        buf.write("\2\u00a2\u00a1\3\2\2\2\u00a2\u00a3\3\2\2\2\u00a3\u00a4")
+        buf.write("\3\2\2\2\u00a4\u00a5\5$\23\2\u00a5\'\3\2\2\2\u00a6\u00aa")
+        buf.write("\79\2\2\u00a7\u00a8\5&\24\2\u00a8\u00a9\7,\2\2\u00a9\u00ab")
+        buf.write("\3\2\2\2\u00aa\u00a7\3\2\2\2\u00ab\u00ac\3\2\2\2\u00ac")
+        buf.write("\u00aa\3\2\2\2\u00ac\u00ad\3\2\2\2\u00ad\u00ae\3\2\2\2")
+        buf.write("\u00ae\u00af\7:\2\2\u00af)\3\2\2\2\u00b0\u00b1\5\30\r")
+        buf.write("\2\u00b1\u00b2\7;\2\2\u00b2\u00b3\5\30\r\2\u00b3\u00b4")
+        buf.write("\7;\2\2\u00b4\u00b5\5\30\r\2\u00b5\u00b6\b\26\1\2\u00b6")
+        buf.write("+\3\2\2\2\u00b7\u00b9\5\6\4\2\u00b8\u00ba\5\60\31\2\u00b9")
+        buf.write("\u00b8\3\2\2\2\u00b9\u00ba\3\2\2\2\u00ba\u00bb\3\2\2\2")
+        buf.write("\u00bb\u00bc\5$\23\2\u00bc-\3\2\2\2\u00bd\u00be\5\"\22")
+        buf.write("\2\u00be\u00c3\5,\27\2\u00bf\u00c0\7\67\2\2\u00c0\u00c2")
+        buf.write("\5,\27\2\u00c1\u00bf\3\2\2\2\u00c2\u00c5\3\2\2\2\u00c3")
+        buf.write("\u00c1\3\2\2\2\u00c3\u00c4\3\2\2\2\u00c4/\3\2\2\2\u00c5")
+        buf.write("\u00c3\3\2\2\2\u00c6\u00c7\7<\2\2\u00c7\u00c9\7B\2\2\u00c8")
+        buf.write("\u00c6\3\2\2\2\u00c9\u00ca\3\2\2\2\u00ca\u00c8\3\2\2\2")
+        buf.write("\u00ca\u00cb\3\2\2\2\u00cb\61\3\2\2\2\25\63<HSZnuz\177")
+        buf.write("\u0086\u0090\u0094\u0099\u009d\u00a2\u00ac\u00b9\u00c3")
+        buf.write("\u00ca")
         return buf.getvalue()
 
 
@@ -716,6 +718,9 @@ class scsParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
+            self.el = None
+            self.t = None # Idtf_lvl1_preffixContext
+            self.i = None # Token
 
         def idtf_lvl1_preffix(self):
             return self.getTypedRuleContext(scsParser.Idtf_lvl1_preffixContext,0)
@@ -737,11 +742,14 @@ class scsParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 96
-            self.idtf_lvl1_preffix()
+            localctx.t = self.idtf_lvl1_preffix()
             self.state = 97
             self.match(scsParser.T__48)
             self.state = 98
-            self.match(scsParser.ID_SYSTEM)
+            localctx.i = self.match(scsParser.ID_SYSTEM)
+
+            localctx.el = self._impl._processIdtfLevel1((None if localctx.t is None else self._input.getText(localctx.t.start,localctx.t.stop)), (None if localctx.i is None else localctx.i.text))
+
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -757,6 +765,8 @@ class scsParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
+            self.el = None
+            self._idtf_lvl1_value = None # Idtf_lvl1_valueContext
 
         def idtf_lvl1_value(self):
             return self.getTypedRuleContext(scsParser.Idtf_lvl1_valueContext,0)
@@ -774,8 +784,11 @@ class scsParser ( Parser ):
         self.enterRule(localctx, 22, self.RULE_idtf_lvl1)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 100
-            self.idtf_lvl1_value()
+            self.state = 101
+            localctx._idtf_lvl1_value = self.idtf_lvl1_value()
+
+            localctx.el = localctx._idtf_lvl1_value.el
+
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -819,23 +832,23 @@ class scsParser ( Parser ):
         self.enterRule(localctx, 24, self.RULE_idtf_edge)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 102
-            self.match(scsParser.T__49)
-            self.state = 103
-            self.idtf_atomic()
             self.state = 104
-            self.connector()
+            self.match(scsParser.T__49)
+            self.state = 105
+            self.idtf_atomic()
             self.state = 106
+            self.connector()
+            self.state = 108
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,5,self._ctx)
             if la_ == 1:
-                self.state = 105
+                self.state = 107
                 self.attr_list()
 
 
-            self.state = 108
+            self.state = 110
             self.idtf_atomic()
-            self.state = 109
+            self.state = 111
             self.match(scsParser.T__50)
         except RecognitionException as re:
             localctx.exception = re
@@ -880,39 +893,39 @@ class scsParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 111
-            self.match(scsParser.T__51)
             self.state = 113
+            self.match(scsParser.T__51)
+            self.state = 115
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,6,self._ctx)
             if la_ == 1:
-                self.state = 112
+                self.state = 114
                 self.attr_list()
 
 
-            self.state = 115
+            self.state = 117
             self.idtf_common()
-            self.state = 123
+            self.state = 125
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==scsParser.T__52:
-                self.state = 116
-                self.match(scsParser.T__52)
                 self.state = 118
+                self.match(scsParser.T__52)
+                self.state = 120
                 self._errHandler.sync(self)
                 la_ = self._interp.adaptivePredict(self._input,7,self._ctx)
                 if la_ == 1:
-                    self.state = 117
+                    self.state = 119
                     self.attr_list()
 
 
-                self.state = 120
+                self.state = 122
                 self.idtf_common()
-                self.state = 125
+                self.state = 127
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
-            self.state = 126
+            self.state = 128
             self.match(scsParser.T__53)
         except RecognitionException as re:
             localctx.exception = re
@@ -949,17 +962,17 @@ class scsParser ( Parser ):
         localctx = scsParser.Idtf_atomicContext(self, self._ctx, self.state)
         self.enterRule(localctx, 28, self.RULE_idtf_atomic)
         try:
-            self.state = 130
+            self.state = 132
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [scsParser.ALIAS_SYMBOLS]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 128
+                self.state = 130
                 self.ifdf_alias()
                 pass
             elif token in [scsParser.T__42, scsParser.T__44, scsParser.T__45, scsParser.T__46, scsParser.T__47, scsParser.ID_SYSTEM]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 129
+                self.state = 131
                 self.idtf_system()
                 pass
             else:
@@ -996,7 +1009,7 @@ class scsParser ( Parser ):
         self.enterRule(localctx, 30, self.RULE_idtf_url)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 132
+            self.state = 134
             self.match(scsParser.LINK)
         except RecognitionException as re:
             localctx.exception = re
@@ -1049,37 +1062,37 @@ class scsParser ( Parser ):
         localctx = scsParser.Idtf_commonContext(self, self._ctx, self.state)
         self.enterRule(localctx, 32, self.RULE_idtf_common)
         try:
-            self.state = 140
+            self.state = 142
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [scsParser.T__42, scsParser.T__44, scsParser.T__45, scsParser.T__46, scsParser.T__47, scsParser.ID_SYSTEM, scsParser.ALIAS_SYMBOLS]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 134
+                self.state = 136
                 self.idtf_atomic()
                 pass
             elif token in [scsParser.T__49]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 135
+                self.state = 137
                 self.idtf_edge()
                 pass
             elif token in [scsParser.T__51]:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 136
+                self.state = 138
                 self.idtf_set()
                 pass
             elif token in [scsParser.CONTOUR_BEGIN]:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 137
+                self.state = 139
                 self.contour()
                 pass
             elif token in [scsParser.T__0, scsParser.CONTENT_BODY]:
                 self.enterOuterAlt(localctx, 5)
-                self.state = 138
+                self.state = 140
                 self.content()
                 pass
             elif token in [scsParser.LINK]:
                 self.enterOuterAlt(localctx, 6)
-                self.state = 139
+                self.state = 141
                 self.idtf_url()
                 pass
             else:
@@ -1129,34 +1142,34 @@ class scsParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 142
-            self.idtf_common()
             self.state = 144
+            self.idtf_common()
+            self.state = 146
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==scsParser.T__54:
-                self.state = 143
+                self.state = 145
                 self.internal_sentence_list()
 
 
-            self.state = 153
+            self.state = 155
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,13,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
-                    self.state = 146
+                    self.state = 148
                     self.match(scsParser.T__52)
-                    self.state = 147
-                    localctx.i2 = self.idtf_common()
                     self.state = 149
+                    localctx.i2 = self.idtf_common()
+                    self.state = 151
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
                     if _la==scsParser.T__54:
-                        self.state = 148
+                        self.state = 150
                         self.internal_sentence_list()
 
              
-                self.state = 155
+                self.state = 157
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,13,self._ctx)
 
@@ -1200,17 +1213,17 @@ class scsParser ( Parser ):
         self.enterRule(localctx, 36, self.RULE_internal_sentence)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 156
-            self.connector()
             self.state = 158
+            self.connector()
+            self.state = 160
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,14,self._ctx)
             if la_ == 1:
-                self.state = 157
+                self.state = 159
                 self.attr_list()
 
 
-            self.state = 160
+            self.state = 162
             self.idtf_list()
         except RecognitionException as re:
             localctx.exception = re
@@ -1248,23 +1261,23 @@ class scsParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 162
+            self.state = 164
             self.match(scsParser.T__54)
-            self.state = 166 
+            self.state = 168 
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while True:
-                self.state = 163
+                self.state = 165
                 self.internal_sentence()
-                self.state = 164
+                self.state = 166
                 self.match(scsParser.T__41)
-                self.state = 168 
+                self.state = 170 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << scsParser.T__1) | (1 << scsParser.T__2) | (1 << scsParser.T__3) | (1 << scsParser.T__4) | (1 << scsParser.T__5) | (1 << scsParser.T__6) | (1 << scsParser.T__7) | (1 << scsParser.T__8) | (1 << scsParser.T__9) | (1 << scsParser.T__10) | (1 << scsParser.T__11) | (1 << scsParser.T__12) | (1 << scsParser.T__13) | (1 << scsParser.T__14) | (1 << scsParser.T__15) | (1 << scsParser.T__16) | (1 << scsParser.T__17) | (1 << scsParser.T__18) | (1 << scsParser.T__19) | (1 << scsParser.T__20) | (1 << scsParser.T__21) | (1 << scsParser.T__22) | (1 << scsParser.T__23) | (1 << scsParser.T__24) | (1 << scsParser.T__25) | (1 << scsParser.T__26) | (1 << scsParser.T__27) | (1 << scsParser.T__28) | (1 << scsParser.T__29) | (1 << scsParser.T__30) | (1 << scsParser.T__31) | (1 << scsParser.T__32) | (1 << scsParser.T__33) | (1 << scsParser.T__34) | (1 << scsParser.T__35) | (1 << scsParser.T__36) | (1 << scsParser.T__37) | (1 << scsParser.T__38) | (1 << scsParser.T__39) | (1 << scsParser.T__40))) != 0)):
                     break
 
-            self.state = 170
+            self.state = 172
             self.match(scsParser.T__55)
         except RecognitionException as re:
             localctx.exception = re
@@ -1281,6 +1294,9 @@ class scsParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
+            self.src = None # Idtf_lvl1Context
+            self.edge = None # Idtf_lvl1Context
+            self.trg = None # Idtf_lvl1Context
 
         def idtf_lvl1(self, i:int=None):
             if i is None:
@@ -1301,16 +1317,19 @@ class scsParser ( Parser ):
         self.enterRule(localctx, 40, self.RULE_sentence_lvl1)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 172
-            self.idtf_lvl1()
-            self.state = 173
-            self.match(scsParser.T__56)
             self.state = 174
-            self.idtf_lvl1()
+            localctx.src = self.idtf_lvl1()
             self.state = 175
             self.match(scsParser.T__56)
             self.state = 176
-            self.idtf_lvl1()
+            localctx.edge = self.idtf_lvl1()
+            self.state = 177
+            self.match(scsParser.T__56)
+            self.state = 178
+            localctx.trg = self.idtf_lvl1()
+
+            self._impl.append_triple(localctx.src.el, localctx.edge.el, localctx.trg.el)
+
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1351,17 +1370,17 @@ class scsParser ( Parser ):
         self.enterRule(localctx, 42, self.RULE_sentence_lvl_4_list_item)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 178
+            self.state = 181
             self.connector()
-            self.state = 180
+            self.state = 183
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,16,self._ctx)
             if la_ == 1:
-                self.state = 179
+                self.state = 182
                 self.attr_list()
 
 
-            self.state = 182
+            self.state = 185
             self.idtf_list()
         except RecognitionException as re:
             localctx.exception = re
@@ -1403,19 +1422,19 @@ class scsParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 184
+            self.state = 187
             self.idtf_common()
-            self.state = 185
+            self.state = 188
             self.sentence_lvl_4_list_item()
-            self.state = 190
+            self.state = 193
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==scsParser.T__52:
-                self.state = 186
+                self.state = 189
                 self.match(scsParser.T__52)
-                self.state = 187
+                self.state = 190
                 self.sentence_lvl_4_list_item()
-                self.state = 192
+                self.state = 195
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -1459,19 +1478,19 @@ class scsParser ( Parser ):
         self.enterRule(localctx, 46, self.RULE_attr_list)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 195 
+            self.state = 198 
             self._errHandler.sync(self)
             _alt = 1
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt == 1:
-                    self.state = 193
+                    self.state = 196
                     self.match(scsParser.ID_SYSTEM)
-                    self.state = 194
+                    self.state = 197
                     self.match(scsParser.EDGE_ATTR)
 
                 else:
                     raise NoViableAltException(self)
-                self.state = 197 
+                self.state = 200 
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,18,self._ctx)
 
