@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Union
 
+import re
+
 
 class Element:
 
@@ -21,6 +23,12 @@ class Element:
     @property
     def name(self) -> str:
         return self._name
+
+    def is_const(self) -> bool:
+        return not self.is_var()
+
+    def is_var(self) -> bool:
+        return re.fullmatch(re.compile("^\.{0,2}_.*$"), self._name) is not None
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(kind: {self.kind.name}, name: {self._name})"
