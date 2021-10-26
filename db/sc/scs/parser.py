@@ -6,26 +6,11 @@ from enum import Enum
 from typing import List, Tuple
 
 from .antlr import SCsLexerAntlr, SCsParserAntlr
-from .impl.parser import SCsParserImpl, Triple, TripleElement
+from .parse_issue import ParseIssue
+from .parser_impl import SCsParserImpl, Triple
 
 
 class SCsParser:
-
-    class Error:
-
-        class Type(Enum):
-            WARNING = 1
-            ERROR = 2
-
-        def __init__(self, line: int, char_pos: int, offending_symbol: str, msg: str, type: Type) -> None:
-            self._line = line
-            self._char_pos = char_pos
-            self._offending_symbol = offending_symbol
-            self._msg = msg
-            self._type = type
-
-        def __repr__(self) -> str:
-            return f"[{self._type.name}] {self._msg}. Line {self._line}:{self._char_pos}. Symbol: {self._offending_symbol}"
 
     class SyntaxErrorListener(ErrorListener):
 
@@ -38,23 +23,30 @@ class SCsParser:
             return self._errors
 
         def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
-            error = SCsParser.Error(
+            error = ParseIssue(
                 line=line,
                 char_pos=column,
                 offending_symbol=offendingSymbol,
                 msg=msg,
-                type=SCsParser.Error.Type.ERROR)
+                type=ParseIssue.Type.ERROR)
 
             self._errors.append(error)
 
     def __init__(self) -> None:
         self._error_listener = SCsParser.SyntaxErrorListener()
         self._impl = SCsParserImpl()
+        self._errors = []
+        self._warnings = []
 
     @property
-    def errors(self) -> List[Error]:
+    def errors(self) -> List[ParseIssue]:
         """Returns list of errors"""
-        return self._error_listener.errors
+        return self._errors
+
+    @property
+    def warnings(self) -> List[ParseIssue]:
+        """Returns list of warnings"""
+        return self._warnings
 
     @property
     def triples(self) -> List[Triple]:
@@ -68,6 +60,12 @@ class SCsParser:
         Source of each triple is a keynode that determines type of sc-element.
         """
         return self._impl.triples
+
+    def has_errors(self) -> bool:
+        return len(self.errors) > 0
+
+    def has_warnings(self) -> bool:
+        return len(self.warnings)
 
     def parse(self, data: str) -> bool:
         """Runs SCs-text parsing from string `data`.
@@ -95,5 +93,10 @@ class SCsParser:
         # do not print errors to console
         parser.removeErrorListener(ConsoleErrorListener.INSTANCE)
         parser.syntax()
+
+        self._errors.extend(self._error_listener.errors)
+        self._errors.extend(self._impl.errors)
+
+        self._warnings.extend(self._impl.warnings)
 
         return len(self.errors) == 0

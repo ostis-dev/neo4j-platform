@@ -1,5 +1,12 @@
 grammar scs;
 
+@parser::header {
+from sc.scs.types import *
+
+def create_token_context(ctx: any) -> TokenContext:
+	return TokenContext(line=ctx.line, column=ctx.column, text=ctx.text)
+}
+
 content: ('_')? CONTENT_BODY;
 
 contour
@@ -63,22 +70,41 @@ sentence_wrap: (sentence ';;');
 
 sentence: sentence_lvl1 | sentence_assign | sentence_lvl_common;
 
-ifdf_alias: ALIAS_SYMBOLS;
+ifdf_alias
+	returns[Element el]:
+	ALIAS_SYMBOLS {
+$ctx.el = self._impl.create_alias(create_token_context($ALIAS_SYMBOLS))
+};
 
-idtf_system: ID_SYSTEM | '...' | idtf_lvl1_preffix;
+idtf_system
+	returns[Element el]:
+	value = (ID_SYSTEM | '...') {
+$ctx.el = create_token_context($value)
+};
 
-sentence_assign: ALIAS_SYMBOLS '=' idtf_common;
+sentence_assign:
+	ALIAS_SYMBOLS '=' idtf_common {
 
-idtf_lvl1_preffix: 'sc_node' | 'sc_link' | 'sc_edge' | 'sc_arc';
+context = create_token_context($ALIAS_SYMBOLS)
+self._impl.define_alias(self._impl.create_alias(context), $idtf_common.el)
+};
+
+idtf_lvl1_preffix
+	returns[context]:
+	value = ('sc_node' | 'sc_link' | 'sc_edge' | 'sc_arc') {
+$ctx.context = create_token_context($value)
+};
 
 idtf_lvl1_value
-	returns[Element el]:
+	returns[el]:
 	t = idtf_lvl1_preffix '#' i = ID_SYSTEM {
-$ctx.el = self._impl._processIdtfLevel1($t.text, $i.text)
+context = $t.context
+context._length += 1 + len($i.text)
+$ctx.el = self._impl._processIdtfLevel1(context, $t.text, $i.text)
 };
 
 idtf_lvl1
-	returns[Element el]:
+	returns[el]:
 	idtf_lvl1_value {
 $ctx.el = $idtf_lvl1_value.el
 };
@@ -88,12 +114,16 @@ idtf_edge: '(' idtf_atomic connector attr_list? idtf_atomic ')';
 idtf_set:
 	'{' attr_list? idtf_common (';' attr_list? idtf_common)* '}';
 
-idtf_atomic: ifdf_alias | idtf_system;
+idtf_atomic
+	returns[Element el]:
+	ifdf_alias {$ctx.el = $ifdf_alias.el}
+	| idtf_system {$ctx.el = $idtf_system.el};
 
 idtf_url: LINK;
 
-idtf_common:
-	idtf_atomic
+idtf_common
+	returns[Element el]:
+	idtf_atomic {$ctx.el = $idtf_atomic.el}
 	| idtf_edge
 	| idtf_set
 	| contour
