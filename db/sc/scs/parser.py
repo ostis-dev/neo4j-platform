@@ -5,8 +5,8 @@ from antlr4.error.ErrorListener import ErrorListener, ConsoleErrorListener
 from enum import Enum
 from typing import List, Tuple
 
-from ._parser import SCsLexerAntlr, SCsParserAntlr
-from .parser_impl import SCsParserImpl, Triple, TripleElement
+from .antlr import SCsLexerAntlr, SCsParserAntlr
+from .impl.parser import SCsParserImpl, Triple, TripleElement
 
 
 class SCsParser:

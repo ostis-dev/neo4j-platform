@@ -1,4 +1,4 @@
-from .element import *
+from sc.scs.element import *
 from typing import AsyncIterable, List, Tuple, Union
 
 from sc.core.keynodes import KeynodeNames
