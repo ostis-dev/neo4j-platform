@@ -4,4 +4,3 @@ termcolor
 Flask
 Flask-JWT-Extended
 Flask-SQLAlchemy
-Flask-Restful

@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import request, jsonify
+from flask import jsonify
 
 from .config import config
 
@@ -33,31 +33,15 @@ def create_app() -> Flask:
         JWTManager,
         jwt_required,
         current_user,
-        create_access_token,
     )
-    from .security import authenticate, user_lookup_callback, user_identity_lookup
+    from .security import user_lookup_callback, user_identity_lookup
 
     jwt = JWTManager(app)
     jwt.user_identity_loader(user_identity_lookup)
     jwt.user_lookup_loader(user_lookup_callback)
 
-    @app.route("/login", methods=["POST"])
-    def login():
-        username = request.json.get("username", None)
-        password = request.json.get("password", None)
-        user = authenticate(username, password)
-        if user:
-            access_token = create_access_token(identity=user)
-            return jsonify(access_token=access_token)
-        else:
-            return jsonify({"message": "Bad username or password"}), 401
-
-    from flask_restful import Api
-    from .resources.user import UserRegister
-
-    api = Api(app)
-
-    api.add_resource(UserRegister, "/register")
+    from .routers import auth
+    app.register_blueprint(auth.router)
 
     @app.route("/")
     def hello_world():
