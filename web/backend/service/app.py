@@ -7,6 +7,9 @@ from .config import config
 def create_app() -> Flask:
     app = Flask(__name__)
 
+    from flask_cors import CORS
+    CORS(app)
+
     from datetime import timedelta
 
     app.secret_key = config.get_secret()
