@@ -2,6 +2,6 @@ Jinja2
 neo4j
 termcolor
 Flask
-Flask-JWT
+Flask-JWT-Extended
 Flask-SQLAlchemy
 Flask-Restful
