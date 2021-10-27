@@ -1,12 +1,15 @@
-from werkzeug.security import check_password_hash
-from .models.user import User
 from typing import Optional
+
+from werkzeug.security import check_password_hash
+
+from .models.user import User
 
 
 def authenticate(username, password) -> Optional[User]:
     user = User.find_by_username(username)
     if user and check_password_hash(user.hashed_password, password):
         return user
+    return None
 
 
 def user_identity_lookup(user: User) -> str:

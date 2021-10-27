@@ -1,5 +1,6 @@
-from ..db import db
 import uuid
+
+from ..db import db
 
 
 class User(db.Model):
