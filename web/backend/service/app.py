@@ -63,7 +63,7 @@ def create_app() -> Flask:
     def hello_world():
         return jsonify({"message": "Hello World!"})
 
-    # from .sc_memory_helpers.user import create_user_in_memory, check_user_in_memory
+    # from .sc_memory.helpers.user import create_user_in_memory, check_user_in_memory
 
     @app.route("/memory_test")
     def test_memory():

@@ -16,7 +16,7 @@ from sc.core.types import (
     TypeNodeStruct,
 )
 
-from ..sc_memory import memory
+from .. import memory
 
 NodeConst = NodeType(const=TypeConst.CONST)
 NodeClass = NodeType(const=TypeConst.CONST, struct=TypeNodeStruct.CLASS)
@@ -95,7 +95,7 @@ def check_user_in_memory(user_id: int) -> bool:
         AssignParameter(ArcMemberConstPosPerm),
         _link_edge,
     )
-    results = tr.run()
+    # results = tr.run()
     # result = results[0]
     # link = result[_link]
 

@@ -1,4 +1,6 @@
 from sc.memory import Memory
-from .config import config
+from ..config import config
 
 memory = Memory(config.get_path_to_sc_config())
+
+__all__ = ("memory", "helpers")
