@@ -34,6 +34,10 @@ def register():
 def login():
     username = request.json.get("username", None)
     password = request.json.get("password", None)
+
+    if not (username and password):
+        return jsonify({"message": "Username and/or password is not provided"}), 401
+
     user = authenticate(username, password)
     if user:
         access_token = create_access_token(identity=user)
