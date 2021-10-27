@@ -1,8 +1,6 @@
 import argparse
 import os
 
-from .app import App
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -13,5 +11,11 @@ def main():
 
     os.environ["CONFIG_PATH"] = args.config
 
-    app = App(args=args)
-    app.run()
+    from .app import create_app
+    from .config import config
+
+    app = create_app()
+    app.run(
+        host=config.get_host(),
+        port=config.get_port(),
+    )

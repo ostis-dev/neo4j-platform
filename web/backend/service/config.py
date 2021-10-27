@@ -3,7 +3,6 @@ import os
 
 
 class Config:
-
     def __init__(self, path) -> None:
         self._path = path
         self._config = configparser.ConfigParser()
@@ -33,3 +32,6 @@ class Config:
             return path
 
         return os.path.normpath(os.path.join(os.path.dirname(self._path), path))
+
+
+config = Config(os.environ.get("CONFIG_PATH"))
