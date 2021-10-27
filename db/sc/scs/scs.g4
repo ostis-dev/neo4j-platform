@@ -1,13 +1,25 @@
 grammar scs;
 
+options {
+	language = Python3;
+}
+
 @parser::header {
 from sc.scs.types import *
+from enum import Enum
 
 def create_token_context(ctx: any) -> TokenContext:
 	return TokenContext(line=ctx.line, column=ctx.column, text=ctx.text)
+
+class ConnectorType:
+	ARC = 0
+	EDGE = 1
 }
 
-content: ('_')? CONTENT_BODY;
+content
+	returns[Element el]: ('_')? CONTENT_BODY {
+$ctx.el = self._impl.create_link(create_token_context($CONTENT_BODY), $CONTENT_BODY.text[1:-1], Link.Type.STRING)
+};
 
 contour
 	@init {count = 1}:
@@ -17,19 +29,28 @@ if count == 0:
     pass
     };
 
-connector
-	returns[str symbol]:
-	c = (
+connector_edge
+	returns[Element el]:
+	symbol = (
 		'<>'
+		| '<=>'
+		| '_<>'
+		| '_<=>'
 		| '>'
 		| '<'
-		| '..>'
+		| '=>'
+		| '<='
+		| '_=>'
+		| '_<='
+	) {$ctx.el = self._impl.create_edge(create_token_context($symbol), $symbol.text)};
+
+connector_arc
+	returns[Element el]:
+	symbol = (
+		'..>'
 		| '<..'
 		| '->'
 		| '<-'
-		| '<=>'
-		| '=>'
-		| '<='
 		| '-|>'
 		| '<|-'
 		| '-/>'
@@ -40,16 +61,10 @@ connector
 		| '<|~'
 		| '~/>'
 		| '</~'
-		| '_<>'
-		| '_>'
-		| '_<'
 		| '_..>'
 		| '_<..'
 		| '_->'
 		| '_<-'
-		| '_<=>'
-		| '_=>'
-		| '_<='
 		| '_-|>'
 		| '_<|-'
 		| '_-/>'
@@ -60,13 +75,18 @@ connector
 		| '_<|~'
 		| '_~/>'
 		| '_</~'
-	) {$ctx.symbol = $c.text};
+	) {$ctx.el = self._impl.create_arc(create_token_context($symbol), $symbol.text)};
+
+connector
+	returns[Element el]:
+	connector_edge {$ctx.el = $connector_edge.el}
+	| connector_arc {$ctx.el = $connector_arc.el};
 
 // ------------- Rules --------------------
 
 syntax: sentence_wrap* EOF;
 
-sentence_wrap: (sentence ';;');
+sentence_wrap: (sentence SENTENCE_SEP);
 
 sentence: sentence_lvl1 | sentence_assign | sentence_lvl_common;
 
@@ -79,7 +99,7 @@ $ctx.el = self._impl.create_alias(create_token_context($ALIAS_SYMBOLS))
 idtf_system
 	returns[Element el]:
 	value = (ID_SYSTEM | '...') {
-$ctx.el = create_token_context($value)
+$ctx.el = self._impl.create_node(create_token_context($value))
 };
 
 sentence_assign:
@@ -95,21 +115,19 @@ idtf_lvl1_preffix
 $ctx.context = create_token_context($value)
 };
 
-idtf_lvl1_value
-	returns[el]:
-	t = idtf_lvl1_preffix '#' i = ID_SYSTEM {
-context = $t.context
-context._length += 1 + len($i.text)
-$ctx.el = self._impl._processIdtfLevel1(context, $t.text, $i.text)
-};
-
 idtf_lvl1
 	returns[el]:
-	idtf_lvl1_value {
-$ctx.el = $idtf_lvl1_value.el
+	idtf_lvl1_preffix LVL1_TYPE_SEP ID_SYSTEM {
+context = create_token_context($ID_SYSTEM)
+$ctx.el = self._impl._processIdtfLevel1(context, $idtf_lvl1_preffix.text)
 };
 
-idtf_edge: '(' idtf_atomic connector attr_list? idtf_atomic ')';
+idtf_edge
+	returns[Elemen el]:
+	'(' src = idtf_atomic connector attr_list? trg = idtf_atomic ')' {
+self._impl.append_triple($src.el, $connector.el, $trg.el)
+$ctx.el = $connector.el
+};
 
 idtf_set:
 	'{' attr_list? idtf_common (';' attr_list? idtf_common)* '}';
@@ -119,41 +137,87 @@ idtf_atomic
 	ifdf_alias {$ctx.el = $ifdf_alias.el}
 	| idtf_system {$ctx.el = $idtf_system.el};
 
-idtf_url: LINK;
+idtf_url
+	returns[Element el]:
+	LINK {
+context = create_token_context($LINK)
+$ctx.el = self._impl.create_link(context, $LINK.text[1:-1], Link.Type.URL)
+};
 
 idtf_common
 	returns[Element el]:
 	idtf_atomic {$ctx.el = $idtf_atomic.el}
-	| idtf_edge
+	| idtf_edge {$ctx.el = $idtf_edge.el}
 	| idtf_set
 	| contour
-	| content
-	| idtf_url;
+	| content {$ctx.el = $content.el}
+	| idtf_url {$ctx.el = $idtf_url.el};
 
-idtf_list:
-	idtf_common internal_sentence_list? (
-		';' i2 = idtf_common internal_sentence_list?
+idtf_list
+	returns[items]
+	@init {$ctx.items = []}:
+	first = idtf_common {$ctx.items.append($first.el)} internal_sentence_list[$first.el]? (
+		';' second = idtf_common {$ctx.items.append($second.el)} internal_sentence_list[$first.el]?
 	)*;
 
-internal_sentence: connector attr_list? idtf_list;
+internal_sentence[Element src]:
+	c = connector attr = attr_list? target = idtf_list {
+for t in $target.items:
+	edge = None
+	if isinstance($c.el, Edge):
+		edge = self._impl.create_edge($c.el.ctx, $c.el.connector)
+	else:
+		edge = self._impl.create_arc($c.el.ctx, $c.el.connector)
+	self._impl.append_triple($src.el, edge, t)
+	if $ctx.attr is not None:
+		for a, e in $attr.items:
+			self._impl.append_triple(a, e, edge)
 
-internal_sentence_list: '(*' (internal_sentence ';;')+ '*)';
+};
+
+internal_sentence_list[Element src]:
+	'(*' (internal_sentence[src] SENTENCE_SEP)+ '*)';
 
 sentence_lvl1:
-	src = idtf_lvl1 '|' edge = idtf_lvl1 '|' trg = idtf_lvl1 {
+	src = idtf_lvl1 LVL1_ITEM_SEP edge = idtf_lvl1 LVL1_ITEM_SEP trg = idtf_lvl1 {
 self._impl.append_triple($src.el, $edge.el, $trg.el)
 };
 
-sentence_lvl_4_list_item: connector attr_list? idtf_list;
+sentence_lvl_4_list_item[Element src]:
+	(c = connector attr = attr_list? target = idtf_list) {
+for t in $target.items:
+	edge = None
+	if isinstance($c.el, Edge):
+		edge = self._impl.create_edge($c.el.ctx, $c.el.connector)
+	else:
+		edge = self._impl.create_arc($c.el.ctx, $c.el.connector)
+
+	self._impl.append_triple($src, edge, t)
+	if $ctx.attr is not None:
+		for a, e in $attr.items:
+			self._impl.append_triple(a, e, edge)
+};
 
 sentence_lvl_common:
-	idtf_common sentence_lvl_4_list_item (
-		';' sentence_lvl_4_list_item
+	idtf_common sentence_lvl_4_list_item[$idtf_common.el] (
+		';' sentence_lvl_4_list_item[$idtf_common.el]
 	)*;
 
-attr_list: (ID_SYSTEM EDGE_ATTR)+;
+attr_list
+	returns[items]
+	@init {$ctx.items = []}: (
+		ID_SYSTEM EDGE_ATTR {
+node = self._impl.create_node(create_token_context($ID_SYSTEM))
+edge = None
+connector = "->" if $EDGE_ATTR.text == ":" else "_->"
+edge = self._impl.create_edge(create_token_context($EDGE_ATTR, connector))
+
+items.append(node, connector)
+}
+	)+;
 
 // ----------------------------
+
 ID_SYSTEM: ('a' ..'z' | 'A' ..'Z' | '_' | '.' | '0' ..'9')+;
 
 ALIAS_SYMBOLS:
@@ -188,3 +252,8 @@ LINE_COMMENT:
 MULTINE_COMMENT: '/*' .*? '*/' -> channel(HIDDEN);
 
 WS: ( ' ' | '\t' | '\r' | '\n') -> channel(HIDDEN);
+
+SENTENCE_SEP: ';;';
+
+LVL1_TYPE_SEP: '#';
+LVL1_ITEM_SEP: '|';

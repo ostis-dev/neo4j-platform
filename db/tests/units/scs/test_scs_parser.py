@@ -13,3 +13,30 @@ class TestSCsParser(unittest.TestCase):
         parser = SCsParser()
         self.assertFalse(parser.parse("x -> y;"))
         self.assertEqual(len(parser.errors), 1)
+
+    def test_comments(self):
+        parser = SCsParser()
+        self.assertTrue(parser.parse((
+            "//Level1\n"
+            "a -> b;;/* example */\n"
+            "c <> d;;"
+        )))
+        self.assertEqual(len(parser.triples), 2)
+
+    def test_links(self):
+        parser = SCsParser()
+        self.assertTrue(parser.parse((
+            "a -> \"file://data.txt\";;"
+            "b -> [x];;"
+            "c -> _[];;"
+            "d -> [];;"
+        )))
+        self.assertEqual(len(parser.triples), 4)
+
+    def test_type_error(self):
+        parser = SCsParser()
+        self.assertFalse(parser.parse((
+            "a <- sc_node_abstract;;"
+            "a <- sc_node_role_relation;;"
+        )))
+        self.assertTrue(parser.has_errors())

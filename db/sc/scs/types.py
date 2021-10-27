@@ -1,4 +1,5 @@
 from enum import Enum
+from sys import is_finalizing
 from typing import Union
 
 import re
@@ -12,7 +13,7 @@ class TokenContext:
         self.text = text
 
     def __repr__(self) -> str:
-        return f"{{ line: {self._line}, column: {self._column}, text: `{self._text}`}}"
+        return f"{{ line: {self.line}, column: {self.column}, text: `{self.text}`}}"
 
 
 class Element:
@@ -36,7 +37,11 @@ class Element:
         return re.fullmatch(re.compile("^\.{0,2}_.*$"), self.name) is not None
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(ctx: {self.ctx}, kind: {self.kind.name}, name: {self.name})"
+        return self.__to_str()
+
+    def _to_str(self, **kwargs):
+        attrs = ', '.join([f"{k}: {v}" for k, v in kwargs.items()])
+        return f"{self.__class__.__name__}(ctx: {self.ctx}, kind: {self.kind.name}, name: {self.name}, {attrs})"
 
 
 class Alias(Element):
@@ -45,6 +50,9 @@ class Alias(Element):
         super().__init__(Element.Kind.ALIAS, name, ctx)
 
         self.target = target
+
+    def __repr__(self) -> str:
+        return self._to_str(target=self.target)
 
 
 class Node(Element):
@@ -55,18 +63,71 @@ class Node(Element):
 
 class Edge(Element):
 
+    VALID = {'<>', '<=>', '_<>', '_<=>', '>',
+             '<', '=>', '<=', '_=>', '_<='}
+    BACKWARD = {'<', '<=', '_<='}
+    REVERSE_DICT = {
+        '<': '>',
+        '<=': '=>',
+        '_<=': '_=>'
+    }
+
     def __init__(self, connector: str, name: str, ctx: TokenContext) -> None:
         super().__init__(Element.Kind.EDGE, name, ctx)
 
-        self.conenctor = connector
+        self.connector = connector
+        if self.connector not in Edge.VALID:
+            raise KeyError(
+                f"Connector `{connector}` is not supported. List of supported connectors: {Edge.VALID}")
+
+    def _reverse_if_back(self) -> bool:
+        """Reverse connector to forward direction.
+
+        If connector was reversed, then returns True.
+        """
+        if self.connector in Edge.BACKWARD:
+            self.connector = Edge.REVERSE_DICT[self.connector]
+
+        return False
+
+    def __repr__(self) -> str:
+        return self._to_str(connector=self.connector)
 
 
 class Arc(Element):
+
+    VALID = {'..>', '<..', '->', '<-', '-|>', '<|-', '-/>', '</-', '~>', '<~', '~|>', '<|~', '~/>', '</~',
+             '_..>', '_<..', '_->', '_<-', '_-|>', '_<|-', '_-/>', '_</-', '_~>', '_<~', '_~|>', '_<|~', '_~/>', '_</~'}
+    BACKWARD = {'<..', '<-', '<|-', '</-', '<~', '<|~',  '</~',
+                '_<..',  '_<-', '_<|-', '_</-',  '_<~',  '_<|~', '_</~'}
+    REVERSE_DICT = {
+        '<..': '..>',
+        '<-': '->', '<|-': '-|>', '</-': '-/>', '<~': '~>', '<|~': "~|>",  '</~': '~/>',
+        '_<..': '_..>',  '_<-': '_->', '_<|-': '_-|>', '_</-': '_-/>',  '_<~': '_~>',  '_<|~': '_~|>', '_</~': '_~/>'
+    }
 
     def __init__(self, connector: str, name: str, ctx: TokenContext) -> None:
         super().__init__(Element.Kind.ARC, name, ctx)
 
         self.connector = connector
+
+        if self.connector not in Arc.VALID:
+            raise KeyError(
+                f"Connector `{connector}` is not supported. List of supported connectors: {Arc.VALID}")
+
+    def _reverse_if_back(self) -> bool:
+        """Reverse connector to forward direction.
+
+        If connector was reversed, then returns True.
+        """
+        if self.connector in Arc.BACKWARD:
+            self.connector = Arc.REVERSE_DICT[self.connector]
+            return True
+
+        return False
+
+    def __repr__(self) -> str:
+        return self._to_str(connector=self.connector)
 
 
 class Link(Element):
@@ -74,14 +135,14 @@ class Link(Element):
     Value = Union[str, int, float]
 
     class Type(Enum):
-        UNKNOWN = 0
-        INT = 1
-        FLOAT = 2
-        STR = 3
-        URL = 4
+        STRING = 0
+        URL = 1
 
-    def __init__(self, name: str, value: Value, type: Type, ctx: TokenContext) -> None:
+    def __init__(self, name: str, value: Value, type_: Type, ctx: TokenContext) -> None:
         super().__init__(Element.Kind.LINK, name, ctx)
 
         self.value = value
-        self.type = type
+        self.type = type_
+
+    def __repr__(self) -> str:
+        return self._to_str(value=self.value, type=self.type.name)

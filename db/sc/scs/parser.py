@@ -1,9 +1,12 @@
 import antlr4
 
+from antlr4.error.Errors import ParseCancellationException
 from antlr4.error.ErrorListener import ErrorListener, ConsoleErrorListener
+from antlr4.error.ErrorStrategy import BailErrorStrategy
 
 from enum import Enum
 from typing import List, Tuple
+
 
 from .antlr import SCsLexerAntlr, SCsParserAntlr
 from .parse_issue import ParseIssue
@@ -89,10 +92,17 @@ class SCsParser:
         stream = antlr4.CommonTokenStream(lexer=lexer)
         parser = SCsParserAntlr(input=stream)
         parser._impl = self._impl
+        parser._errHandler = BailErrorStrategy()
         parser.addErrorListener(self._error_listener)
         # do not print errors to console
         parser.removeErrorListener(ConsoleErrorListener.INSTANCE)
-        parser.syntax()
+
+        try:
+            parser.syntax()
+        except ParseCancellationException as ex:
+            if len(self._error_listener.errors) + len(self._impl.errors) == 0:
+                self._errors.append(ParseIssue(
+                    0, 0, '', "Wasn't able to parse input", ParseIssue.Type.ERROR))
 
         self._errors.extend(self._error_listener.errors)
         self._errors.extend(self._impl.errors)

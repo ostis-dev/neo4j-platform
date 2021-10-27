@@ -1,6 +1,6 @@
 import unittest
 
-from sc.scs.element import *
+from sc.scs.types import *
 from sc.scs.parser import SCsParser
 
 

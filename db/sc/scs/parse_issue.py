@@ -14,4 +14,4 @@ class ParseIssue:
         self._type = type
 
     def __repr__(self) -> str:
-        return f"[{self._type.name}] {self._msg}. Line {self._line}:{self._char_pos}. Symbol: {self._offending_symbol}"
+        return f"{self._type.name}: {self._msg}. Line {self._line}:{self._char_pos}. Symbol: {self._offending_symbol}"

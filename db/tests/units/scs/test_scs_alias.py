@@ -74,7 +74,7 @@ class TestSCsAlias(unittest.TestCase):
              "@alias2 = @alias1;;"
              "_y -|> @alias2;;")))
 
-        self.assertEqual(len(parser.triples), 1)
+        self.assertEqual(len(parser.triples), 2)
         self.assertFalse(parser.has_warnings())
 
         _, _, trg = parser.triples[0]
