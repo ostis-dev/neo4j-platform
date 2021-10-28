@@ -11,8 +11,10 @@ router = Blueprint("auth", __name__)
 
 @router.route("/register", methods=["POST"])
 def register():
-    username = request.json.get("username", None)
-    password = request.json.get("password", None)
+    data = request.get_json()
+    username = data.get("username", None)
+    password = data.get("password", None)
+    full_name = data.get("full_name", None)
 
     if not (username and password):
         return jsonify({"message": "Username and/or password is not provided"}), 401
@@ -23,6 +25,7 @@ def register():
     user = User(
         username=username,
         hashed_password=generate_password_hash(password),
+        full_name=full_name,
     )
     user.save_to_db()
 
@@ -32,8 +35,9 @@ def register():
 
 @router.route("/login", methods=["POST"])
 def login():
-    username = request.json.get("username", None)
-    password = request.json.get("password", None)
+    data = request.get_json()
+    username = data.get("username", None)
+    password = data.get("password", None)
 
     if not (username and password):
         return jsonify({"message": "Username and/or password is not provided"}), 401
