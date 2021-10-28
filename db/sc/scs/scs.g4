@@ -88,7 +88,7 @@ syntax: sentence_wrap* EOF;
 
 sentence_wrap: (sentence SENTENCE_SEP);
 
-sentence: sentence_lvl1 | sentence_assign | sentence_lvl_common;
+sentence: sentence_assign | sentence_lvl_common;
 
 ifdf_alias
 	returns[Element el]:
@@ -107,19 +107,6 @@ sentence_assign:
 
 context = create_token_context($ALIAS_SYMBOLS)
 self._impl.define_alias(self._impl.create_alias(context), $idtf_common.el)
-};
-
-idtf_lvl1_preffix
-	returns[context]:
-	value = ('sc_node' | 'sc_link' | 'sc_edge' | 'sc_arc') {
-$ctx.context = create_token_context($value)
-};
-
-idtf_lvl1
-	returns[el]:
-	idtf_lvl1_preffix LVL1_TYPE_SEP ID_SYSTEM {
-context = create_token_context($ID_SYSTEM)
-$ctx.el = self._impl._processIdtfLevel1(context, $idtf_lvl1_preffix.text)
 };
 
 idtf_edge
@@ -181,11 +168,6 @@ for t in $target.items:
 
 internal_sentence_list[Element src]:
 	'(*' (internal_sentence[src] SENTENCE_SEP)+ '*)';
-
-sentence_lvl1:
-	src = idtf_lvl1 LVL1_ITEM_SEP edge = idtf_lvl1 LVL1_ITEM_SEP trg = idtf_lvl1 {
-self._impl.append_triple($src.el, $edge.el, $trg.el)
-};
 
 sentence_lvl_4_list_item[Element src]:
 	(c = connector attr = attr_list? target = idtf_list) {
@@ -258,6 +240,3 @@ MULTINE_COMMENT: '/*' .*? '*/' -> channel(HIDDEN);
 WS: ( ' ' | '\t' | '\r' | '\n') -> channel(HIDDEN);
 
 SENTENCE_SEP: ';;';
-
-LVL1_TYPE_SEP: '#';
-LVL1_ITEM_SEP: '|';
