@@ -4,7 +4,7 @@ from sc.scs.types import *
 from sc.scs.parser import SCsParser
 
 
-class TestSCsParserLevel2(unittest.TestCase):
+class TestSCsLevel2(unittest.TestCase):
 
     def test_reverse(self):
         parser = SCsParser()

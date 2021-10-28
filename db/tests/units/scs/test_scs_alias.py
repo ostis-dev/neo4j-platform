@@ -1,7 +1,7 @@
 import unittest
 
 from sc.scs.parser import SCsParser
-from sc.scs.types import Arc, Edge, Element, Link, Node
+from sc.scs.types import *
 
 
 class TestSCsAlias(unittest.TestCase):

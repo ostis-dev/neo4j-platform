@@ -4,7 +4,7 @@ from sc.scs.types import *
 from sc.scs.parser import SCsParser
 
 
-class TestSCsParserLevel3(unittest.TestCase):
+class TestSCsLevel3(unittest.TestCase):
 
     def test_smoke(self):
         parser = SCsParser()
