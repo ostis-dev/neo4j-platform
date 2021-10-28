@@ -910,6 +910,7 @@ class scsParser ( Parser ):
             self.el = None
             self.src = None # Idtf_atomicContext
             self._connector = None # ConnectorContext
+            self.attr = None # Attr_listContext
             self.trg = None # Idtf_atomicContext
 
         def connector(self):
@@ -950,7 +951,7 @@ class scsParser ( Parser ):
             la_ = self._interp.adaptivePredict(self._input,5,self._ctx)
             if la_ == 1:
                 self.state = 119
-                self.attr_list()
+                localctx.attr = self.attr_list()
 
 
             self.state = 122
@@ -960,6 +961,10 @@ class scsParser ( Parser ):
 
             self._impl.append_triple(localctx.src.el, localctx._connector.el, localctx.trg.el)
             localctx.el = localctx._connector.el
+
+            if localctx.attr is not None:
+            	for a, e in localctx.attr.items:
+            		self._impl.append_triple(a, e, localctx._connector.el)
 
         except RecognitionException as re:
             localctx.exception = re
@@ -1682,9 +1687,9 @@ class scsParser ( Parser ):
                     node = self._impl.create_node(create_token_context(localctx._ID_SYSTEM))
                     edge = None
                     connector = "->" if (None if localctx._EDGE_ATTR is None else localctx._EDGE_ATTR.text) == ":" else "_->"
-                    edge = self._impl.create_edge(create_token_context(localctx._EDGE_ATTR, connector))
+                    edge = self._impl.create_arc(create_token_context(localctx._EDGE_ATTR), connector)
 
-                    items.append(node, connector)
+                    localctx.items.append((node, edge))
 
 
                 else:

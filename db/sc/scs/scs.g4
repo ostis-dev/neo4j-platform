@@ -124,9 +124,13 @@ $ctx.el = self._impl._processIdtfLevel1(context, $idtf_lvl1_preffix.text)
 
 idtf_edge
 	returns[Elemen el]:
-	'(' src = idtf_atomic connector attr_list? trg = idtf_atomic ')' {
+	'(' src = idtf_atomic connector attr = attr_list? trg = idtf_atomic ')' {
 self._impl.append_triple($src.el, $connector.el, $trg.el)
 $ctx.el = $connector.el
+
+if $ctx.attr is not None:
+	for a, e in $attr.items:
+		self._impl.append_triple(a, e, $connector.el)
 };
 
 idtf_set:
@@ -210,9 +214,9 @@ attr_list
 node = self._impl.create_node(create_token_context($ID_SYSTEM))
 edge = None
 connector = "->" if $EDGE_ATTR.text == ":" else "_->"
-edge = self._impl.create_edge(create_token_context($EDGE_ATTR, connector))
+edge = self._impl.create_arc(create_token_context($EDGE_ATTR), connector)
 
-items.append(node, connector)
+$ctx.items.append((node, edge))
 }
 	)+;
 

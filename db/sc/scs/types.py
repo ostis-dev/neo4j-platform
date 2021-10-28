@@ -37,7 +37,7 @@ class Element:
         return re.fullmatch(re.compile("^\.{0,2}_.*$"), self.name) is not None
 
     def __repr__(self) -> str:
-        return self.__to_str()
+        return self._to_str()
 
     def _to_str(self, **kwargs):
         attrs = ', '.join([f"{k}: {v}" for k, v in kwargs.items()])
