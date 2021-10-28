@@ -5,3 +5,4 @@ Flask
 Flask-JWT-Extended
 Flask-SQLAlchemy
 Flask-Cors
+Flask-Swagger-UI

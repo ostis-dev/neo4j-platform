@@ -5,7 +5,7 @@ from flask import Flask, jsonify
 
 
 def create_app(test_config: Optional[dict] = None) -> Flask:
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder="staticfiles")
 
     from flask_cors import CORS
 
@@ -50,9 +50,10 @@ def create_app(test_config: Optional[dict] = None) -> Flask:
     jwt.user_identity_loader(user_identity_lookup)
     jwt.user_lookup_loader(user_lookup_callback)
 
-    from .routers import auth
+    from .routers import auth, swagger
 
     app.register_blueprint(auth.router)
+    app.register_blueprint(swagger.router)
 
     @app.route("/")
     def hello_world():
