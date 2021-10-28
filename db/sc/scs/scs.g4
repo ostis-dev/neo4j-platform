@@ -153,13 +153,14 @@ idtf_list
 
 internal_sentence[Element src]:
 	c = connector attr = attr_list? target = idtf_list {
+
 for t in $target.items:
 	edge = None
 	if isinstance($c.el, Edge):
 		edge = self._impl.create_edge($c.el.ctx, $c.el.connector)
 	else:
 		edge = self._impl.create_arc($c.el.ctx, $c.el.connector)
-	self._impl.append_triple($src.el, edge, t)
+	self._impl.append_triple($src, edge, t)
 	if $ctx.attr is not None:
 		for a, e in $attr.items:
 			self._impl.append_triple(a, e, edge)

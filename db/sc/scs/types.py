@@ -41,7 +41,11 @@ class Element:
 
     def _to_str(self, **kwargs):
         attrs = ', '.join([f"{k}: {v}" for k, v in kwargs.items()])
-        return f"{self.__class__.__name__}(ctx: {self.ctx}, kind: {self.kind.name}, name: {self.name}, {attrs})"
+        return(
+            f"{self.__class__.__name__}(ctx: {self.ctx}, "
+            f"kind: {self.kind.name}, "
+            f"name: {self.name}"
+            f"{', ' + attrs if len(attrs) > 0 else ''})")
 
 
 class Alias(Element):
@@ -87,6 +91,7 @@ class Edge(Element):
         """
         if self.connector in Edge.BACKWARD:
             self.connector = Edge.REVERSE_DICT[self.connector]
+            return True
 
         return False
 

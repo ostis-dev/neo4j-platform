@@ -1245,13 +1245,14 @@ class scsParser ( Parser ):
             self.state = 175
             localctx.target = self.idtf_list()
 
+
             for t in localctx.target.items:
             	edge = None
             	if isinstance(localctx.c.el, Edge):
             		edge = self._impl.create_edge(localctx.c.el.ctx, localctx.c.el.connector)
             	else:
             		edge = self._impl.create_arc(localctx.c.el.ctx, localctx.c.el.connector)
-            	self._impl.append_triple(localctx.src.el, edge, t)
+            	self._impl.append_triple(localctx.src, edge, t)
             	if localctx.attr is not None:
             		for a, e in localctx.attr.items:
             			self._impl.append_triple(a, e, edge)
