@@ -3,7 +3,8 @@
 disable=
     missing-docstring,
     no-member,
-    import-error
+    import-error,
+    duplicate-code
 
 
 [BASIC]
