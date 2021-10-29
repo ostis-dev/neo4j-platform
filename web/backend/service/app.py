@@ -50,7 +50,7 @@ def create_app(test_config: Optional[dict] = None) -> Flask:
     jwt.user_identity_loader(user_identity_lookup)
     jwt.user_lookup_loader(user_lookup_callback)
 
-    from flask import json
+    from flask import json, redirect
     from werkzeug.exceptions import HTTPException
 
     @app.errorhandler(HTTPException)
@@ -68,15 +68,15 @@ def create_app(test_config: Optional[dict] = None) -> Flask:
 
     @app.route("/")
     def hello_world():
-        return jsonify({"message": "Hello World!"})
+        return redirect("/docs")
 
     # from .sc_memory.helpers.user import create_user_in_memory, check_user_in_memory
 
-    @app.route("/memory_test")
+    @app.route("/im_teapot")
     def test_memory():
         # create_user_in_memory(1)
         # check_user_in_memory(1)
 
-        return jsonify({"message": "ok"})
+        return jsonify({"message": "I'm a teapot"}), 418
 
     return app

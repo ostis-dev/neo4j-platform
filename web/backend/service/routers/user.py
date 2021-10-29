@@ -11,6 +11,10 @@ router = Blueprint("auth", __name__)
 @router.route("/register", methods=["POST"])
 def register():
     data = request.get_json()
+
+    if not data:
+        return jsonify({"message": "Request data is not JSON"}), 400
+
     username = data.get("username", None)
     password = data.get("password", None)
     full_name = data.get("full_name", None)
@@ -35,6 +39,10 @@ def register():
 @router.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
+
+    if not data:
+        return jsonify({"message": "Request data is not JSON"}), 400
+
     username = data.get("username", None)
     password = data.get("password", None)
 
