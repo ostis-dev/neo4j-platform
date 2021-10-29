@@ -6,6 +6,10 @@ from ..db import db
 class User(db.Model):
     __tablename__ = "users"
 
+    # If DB is PostgreSQL preferred to use smth like this:
+    #     from sqlalchemy.dialects.postgresql import UUID
+    #     id = db.Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
+    # But current variant universal for all SQL DBs
     id = db.Column(
         db.String, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )

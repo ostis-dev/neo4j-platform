@@ -1,8 +1,4 @@
-import json
-import os
-from urllib.parse import urljoin
-
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app
 from flask_swagger_ui import get_swaggerui_blueprint
 
 

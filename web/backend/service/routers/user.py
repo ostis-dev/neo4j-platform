@@ -48,7 +48,7 @@ def login():
     return jsonify({"message": "Bad username or password"}), 400
 
 
-@router.route("/users/me", methods=["GET"])
+@router.route("/me", methods=["GET"])
 @jwt_required()
 def get_current_user():
     return jsonify(current_user.as_dict())

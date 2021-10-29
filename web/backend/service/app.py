@@ -50,9 +50,24 @@ def create_app(test_config: Optional[dict] = None) -> Flask:
     jwt.user_identity_loader(user_identity_lookup)
     jwt.user_lookup_loader(user_lookup_callback)
 
-    from .routers import auth, swagger
+    from flask import json
+    from werkzeug.exceptions import HTTPException
 
-    app.register_blueprint(auth.router)
+    @app.errorhandler(HTTPException)
+    def handle_exception(e):
+        """Return JSON instead of HTML for HTTP errors."""
+        # start with the correct headers and status code from the error
+        response = e.get_response()
+        # replace the body with JSON
+        response.data = json.dumps({
+            "message": e.description,
+        })
+        response.content_type = "application/json"
+        return response
+
+    from .routers import user, swagger
+
+    app.register_blueprint(user.router, url_prefix="/users")
     app.register_blueprint(swagger.router)
 
     @app.route("/")
