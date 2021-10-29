@@ -5,7 +5,7 @@ import unittest
 from service.app import create_app
 
 
-class FlaskAppCase(unittest.TestCase):
+class FlaskAppTestCase(unittest.TestCase):
     def setUp(self):
         self.db_fd, self.db_path = tempfile.mkstemp()
 
