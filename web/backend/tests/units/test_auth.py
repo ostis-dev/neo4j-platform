@@ -173,6 +173,4 @@ class TestGetCurrentUser(FlaskAppTestCase):
 
         self.assertNotIn("username", json_data)
         self.assertIn("message", json_data)
-        self.assertEqual(
-            "Missing Authorization Header", json_data["message"]
-        )
+        self.assertEqual("Missing Authorization Header", json_data["message"])

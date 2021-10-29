@@ -12,7 +12,7 @@
     }
   ],
   "paths": {
-    "/login": {
+    "/users/login": {
       "post": {
         "tags": [
           "user"
@@ -52,7 +52,7 @@
         }
       }
     },
-    "/register": {
+    "/users/register": {
       "post": {
         "tags": [
           "user"

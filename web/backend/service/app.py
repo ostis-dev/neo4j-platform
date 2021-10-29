@@ -42,7 +42,7 @@ def create_app(test_config: Optional[dict] = None) -> Flask:
     def create_tables():
         db.create_all()
 
-    from flask_jwt_extended import JWTManager, current_user, jwt_required
+    from flask_jwt_extended import JWTManager
 
     from .security import user_identity_lookup, user_lookup_callback
 
@@ -56,12 +56,8 @@ def create_app(test_config: Optional[dict] = None) -> Flask:
     @app.errorhandler(HTTPException)
     def handle_exception(e):
         """Return JSON instead of HTML for HTTP errors."""
-        # start with the correct headers and status code from the error
         response = e.get_response()
-        # replace the body with JSON
-        response.data = json.dumps({
-            "message": e.description,
-        })
+        response.data = json.dumps({"message": e.description})
         response.content_type = "application/json"
         return response
 
@@ -82,10 +78,5 @@ def create_app(test_config: Optional[dict] = None) -> Flask:
         # check_user_in_memory(1)
 
         return jsonify({"message": "ok"})
-
-    @app.route("/jwt_test")
-    @jwt_required()
-    def jwt_test():
-        return jsonify({"username": current_user.username})
 
     return app
