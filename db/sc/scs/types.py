@@ -15,6 +15,9 @@ class TokenContext:
     def __repr__(self) -> str:
         return f"{{ line: {self.line}, column: {self.column}, text: `{self.text}`}}"
 
+    def clone(self):
+        return TokenContext(self.line, self.column, self.text)
+
 
 class Element:
 

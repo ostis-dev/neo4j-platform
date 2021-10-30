@@ -39,6 +39,9 @@ class SCsParserImpl:
         self._errors = []
         self._warnings = []
 
+        # Stack of contours
+        self._contour_stack = []
+
     @property
     def errors(self) -> List[ParseIssue]:
         return self._errors
@@ -57,12 +60,15 @@ class SCsParserImpl:
         """Returns list of triples"""
         return self._triples
 
-    def _process_name(self, name: str, prefix: str = "el") -> str:
+    def _process_name(self, name: str, prefix: str = "el", force_var: bool = False) -> str:
         def next_id():
             self._names_counter += 1
             return self._names_counter
 
-        return name if name is not None or name == "..." else f"..{prefix}_generated_{next_id()}"
+        if name is None or name == "..." or name == "{":
+            name = f"..{'_' if force_var else ''}{prefix}_generated_{next_id()}"
+
+        return name
 
     def _is_type_keynode(self, name: str) -> bool:
         """Checks if specified name if a type keynode"""
@@ -78,8 +84,10 @@ class SCsParserImpl:
     def create_node(self, ctx: TokenContext) -> Node:
         return Node(self._process_name(ctx.text, prefix="node"), ctx)
 
-    def create_link(self, ctx: TokenContext, value: Link.Value, type: Link.Type) -> Link:
-        return Link(self._process_name(ctx.text, prefix="link"), value, type, ctx)
+    def create_link(self, ctx: TokenContext, value: Link.Value, type: Link.Type, is_var: bool) -> Link:
+        return Link(self._process_name(None, prefix="link", force_var=is_var),
+                    self._link_remove_escape_symbols(value),
+                    type, ctx)
 
     def create_edge(self, ctx: TokenContext, connector: str) -> Edge:
         return Edge(connector, self._process_name(None, prefix="edge"), ctx)
@@ -101,10 +109,12 @@ class SCsParserImpl:
         if trg.kind == Element.Kind.ALIAS:
             trg = _resolve_alias(trg)
 
+        triples = self._contour_stack[-1] if len(self._contour_stack) > 0 else self._triples
+
         if edge._reverse_if_back():
-            self._triples.append((trg, edge, src))
+            triples.append((trg, edge, src))
         else:
-            self._triples.append((src, edge, trg))
+            triples.append((src, edge, trg))
 
     def define_alias(self, alias: Alias, target: Element) -> Alias:
         """Create new alias to specified element"""
@@ -135,19 +145,26 @@ class SCsParserImpl:
         except KeyError:
             self._types[name] = {type_keynode}
 
-    def _processIdtfLevel1(self, ctx: TokenContext, type_: str) -> Element:
-        """Determines which element should be created by identifier from scs-level-1."""
-        if type_ == KeynodeNames.SC_NODE:
-            return self.create_node(ctx)
-        elif type_ == KeynodeNames.SC_ARC:
-            return self.create_arc(ctx, '..>')
-        elif type_ == KeynodeNames.SC_EDGE:
-            return self.create_edge(ctx, '>')
-        elif type_ == KeynodeNames.SC_LINK:
-            return self.create_link(ctx, "", Link.Type.STRING)
-        else:
-            self._new_error(ctx, (f"Type `{type_}` is not supported. You should use only types from a list: "
-                                  "{KeynodeNames.SC_NODE},  {KeynodeNames.SC_ARC}, "
-                                  "{KeynodeNames.SC_EDGE}, {KeynodeNames.SC_LINK}"))
+    def _link_remove_escape_symbols(self, input: str) -> str:
+        return input.replace("\\[", "[").replace("\\]", "]").replace("\\\\", "\\")
 
-        return None
+    def start_contour(self):
+        self._contour_stack.append([])
+
+    def end_contour(self, contour: Node):
+        contour_triples = self._contour_stack.pop()
+        self._triples.extend(contour_triples)
+
+        # append elements into contour
+        added = set()
+
+        def add_element(child: Element):
+            if child.name not in added:
+                edge = self.create_arc(TokenContext(-1, -1, "->"), "->")
+                self._triples.append((contour, edge, child))
+                added.add(child.name)
+
+        for src, edge, trg in contour_triples:
+            add_element(src)
+            add_element(edge)
+            add_element(trg)

@@ -29,7 +29,7 @@ class SCsParser:
             error = ParseIssue(
                 line=line,
                 char_pos=column,
-                offending_symbol=offendingSymbol,
+                token=e.offendingToken.text if e.offendingToken else None,
                 msg=msg,
                 type=ParseIssue.Type.ERROR)
 
@@ -89,8 +89,12 @@ class SCsParser:
     def _parseImpl(self, stream: antlr4.InputStream) -> bool:
 
         lexer = SCsLexerAntlr(input=stream)
+        lexer.addErrorListener(self._error_listener)
+        lexer.removeErrorListener(ConsoleErrorListener.INSTANCE)
+
         stream = antlr4.CommonTokenStream(lexer=lexer)
         parser = SCsParserAntlr(input=stream)
+
         parser._impl = self._impl
         parser._errHandler = BailErrorStrategy()
         parser.addErrorListener(self._error_listener)

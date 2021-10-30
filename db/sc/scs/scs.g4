@@ -17,17 +17,20 @@ class ConnectorType:
 }
 
 content
-	returns[Element el]: ('_')? CONTENT_BODY {
-$ctx.el = self._impl.create_link(create_token_context($CONTENT_BODY), $CONTENT_BODY.text[1:-1], Link.Type.STRING)
+	returns[Element el]: (v='_')? CONTENT_BODY {
+token_context = create_token_context($CONTENT_BODY)
+$ctx.el = self._impl.create_link(token_context, $CONTENT_BODY.text[1:-1], Link.Type.STRING, $v is not None)
 };
 
-contour
+contour returns[Element el]
 	@init {count = 1}:
-	CONTOUR_BEGIN {count > 0}? (sentence_wrap*) CONTOUR_END {
+	CONTOUR_BEGIN {count > 0}? {self._impl.start_contour()} (sentence_wrap*) CONTOUR_END {
 count -= 1
 if count == 0:
-    pass
-    };
+	contour = self._impl.create_node(create_token_context($CONTOUR_BEGIN))
+	self._impl.end_contour(contour)
+	$ctx.el = contour
+};
 
 connector_edge
 	returns[Element el]:
@@ -120,8 +123,24 @@ if $ctx.attr is not None:
 		self._impl.append_triple(a, e, $connector.el)
 };
 
-idtf_set:
-	'{' attr_list? idtf_common (';' attr_list? idtf_common)* '}';
+idtf_set_item[Element set]:
+	attr = attr_list? idtf = idtf_common {
+edge = self._impl.create_arc($idtf.el.ctx.clone(), '->')
+self._impl.append_triple($set, edge, $idtf.el)
+if $ctx.attr is not None:
+	for a, e in $attr.items:
+		self._impl.append_triple(a, e, edge)
+};
+
+idtf_set_item_list[Element set]:
+	idtf_set_item[set] (';' idtf_set_item[set])*;
+
+idtf_set
+	returns[Element el]:
+	t = '{' {
+context = create_token_context($t)
+$ctx.el = self._impl.create_node(context)
+	} idtf_set_item_list[$ctx.el] '}';
 
 idtf_atomic
 	returns[Element el]:
@@ -132,15 +151,15 @@ idtf_url
 	returns[Element el]:
 	LINK {
 context = create_token_context($LINK)
-$ctx.el = self._impl.create_link(context, $LINK.text[1:-1], Link.Type.URL)
+$ctx.el = self._impl.create_link(context, $LINK.text[1:-1], Link.Type.URL, False)
 };
 
 idtf_common
 	returns[Element el]:
 	idtf_atomic {$ctx.el = $idtf_atomic.el}
 	| idtf_edge {$ctx.el = $idtf_edge.el}
-	| idtf_set
-	| contour
+	| idtf_set {$ctx.el = $idtf_set.el}
+	| contour {$ctx.el = $contour.el}
 	| content {$ctx.el = $content.el}
 	| idtf_url {$ctx.el = $idtf_url.el};
 
