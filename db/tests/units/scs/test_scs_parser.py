@@ -33,10 +33,11 @@ class TestSCsParser(unittest.TestCase):
         )))
         self.assertEqual(len(parser.triples), 4)
 
-    def test_type_error(self):
+    def test_type_no_error(self):
         parser = SCsParser()
-        self.assertFalse(parser.parse((
+        self.assertTrue(parser.parse((
             "a <- sc_node_abstract;;"
             "a <- sc_node_role_relation;;"
         )))
-        self.assertTrue(parser.has_errors())
+        self.assertFalse(parser.has_errors())
+        self.assertEqual(len(parser.triples), 2)

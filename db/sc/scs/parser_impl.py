@@ -24,14 +24,6 @@ class SCsParserImpl:
         # Counter for generated names
         self._names_counter = 0
 
-        # Set of type keynodes (for fast access)
-        self._type_keynodes = set()
-        self._type_keynodes.update(KeynodeNames.CORE_TYPES)
-        self._type_keynodes.update(KeynodeNames.CONST_TYPES)
-        self._type_keynodes.update(KeynodeNames.NODE_TYPES)
-        self._type_keynodes.update(KeynodeNames.ARC_PERM_TYPES)
-        self._type_keynodes.update(KeynodeNames.ARC_POS_TYPES)
-
         # Dictionary of alias definitions <str, AliasDefinition>
         self._aliases = {}
 
@@ -138,12 +130,6 @@ class SCsParserImpl:
     def _new_warning(self, ctx: TokenContext, msg: str):
         self._warnings.append(
             ParseIssue(ctx.line, ctx.column, ctx.text, msg, ParseIssue.Type.ERROR))
-
-    def _add_type(self, name: str, type_keynode: str):
-        try:
-            self._types[name].add(type_keynode)
-        except KeyError:
-            self._types[name] = {type_keynode}
 
     def _link_remove_escape_symbols(self, input: str) -> str:
         return input.replace("\\[", "[").replace("\\]", "]").replace("\\\\", "\\")
