@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-from flask import Flask, jsonify
+from flask import Flask, current_app, jsonify
 
 
 def create_app(test_config: Optional[dict] = None) -> Flask:
@@ -11,26 +11,21 @@ def create_app(test_config: Optional[dict] = None) -> Flask:
 
     CORS(app)
 
-    from datetime import timedelta
-
+    # General config
     app.config.from_mapping(
-        SECRET_KEY="dev",
         PROPAGATE_EXCEPTIONS=True,
-        # SQLAlchemy Setup
-        SQLALCHEMY_DATABASE_URI=os.path.join(app.instance_path, "db.sqlite"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        # JWT Setup
-        JWT_SECRET_KEY="dev",
-        JWT_ACCESS_TOKEN_EXPIRES=timedelta(days=7),
-        JWT_ERROR_MESSAGE_KEY="message",
     )
 
     if not test_config:
         from .config import config
 
         app.secret_key = config.get_secret()
+        app.config["API_RESPONSE_MESSAGE_KEY"] = config.get_api_response_message_key()
         app.config["SQLALCHEMY_DATABASE_URI"] = config.get_db_address()
         app.config["JWT_SECRET_KEY"] = app.secret_key
+        app.config["JWT_ACCESS_TOKEN_EXPIRES"] = config.get_jwt_token_expiration_time()
+        app.config["JWT_ERROR_MESSAGE_KEY"] = app.config["API_RESPONSE_MESSAGE_KEY"]
     else:
         app.config.update(test_config)
 
@@ -57,11 +52,13 @@ def create_app(test_config: Optional[dict] = None) -> Flask:
     def handle_exception(e):
         """Return JSON instead of HTML for HTTP errors."""
         response = e.get_response()
-        response.data = json.dumps({"message": e.description})
+        response.data = json.dumps(
+            {current_app.config["API_RESPONSE_MESSAGE_KEY"]: e.description}
+        )
         response.content_type = "application/json"
         return response
 
-    from .routers import user, swagger
+    from .routers import swagger, user
 
     app.register_blueprint(user.router, url_prefix="/users")
     app.register_blueprint(swagger.router)
@@ -77,6 +74,9 @@ def create_app(test_config: Optional[dict] = None) -> Flask:
         # create_user_in_memory(1)
         # check_user_in_memory(1)
 
-        return jsonify({"message": "I'm a teapot"}), 418
+        return (
+            jsonify({current_app.config["API_RESPONSE_MESSAGE_KEY"]: "I'm a teapot"}),
+            418,
+        )
 
     return app

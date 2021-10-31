@@ -1,5 +1,6 @@
 import configparser
 import os
+from datetime import timedelta
 
 
 class Config:
@@ -25,6 +26,16 @@ class Config:
 
     def get_db_address(self) -> str:
         return self._get_safe_value("flask", "sql", "sqlite:///../data.sqlite")
+
+    def get_jwt_token_expiration_time(self) -> timedelta:
+        expiration_time_in_minutes = int(
+            self._get_safe_value("flask", "jwt_expiration_time", "60")
+        )
+
+        return timedelta(minutes=expiration_time_in_minutes)
+
+    def get_api_response_message_key(self) -> str:
+        return self._get_safe_value("flask", "api_response_message_key", "message")
 
     def get_path_to_sc_config(self) -> str:
         path = self._get_safe_value("sc", "config", "")
