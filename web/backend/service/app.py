@@ -67,16 +67,4 @@ def create_app(test_config: Optional[dict] = None) -> Flask:
     def hello_world():
         return redirect("/docs")
 
-    # from .sc_memory.helpers.user import create_user_in_memory, check_user_in_memory
-
-    @app.route("/im_teapot")
-    def test_memory():
-        # create_user_in_memory(1)
-        # check_user_in_memory(1)
-
-        return (
-            jsonify({current_app.config["API_RESPONSE_MESSAGE_KEY"]: "I'm a teapot"}),
-            418,
-        )
-
     return app
