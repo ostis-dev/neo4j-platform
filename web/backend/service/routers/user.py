@@ -1,5 +1,6 @@
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token, current_user, jwt_required
+from werkzeug.exceptions import BadRequest, UnprocessableEntity, UnsupportedMediaType
 from werkzeug.security import generate_password_hash
 
 from ..models.user import User
@@ -13,39 +14,17 @@ def register():
     data = request.get_json()
 
     if not data:
-        return (
-            jsonify(
-                {
-                    current_app.config[
-                        "API_RESPONSE_MESSAGE_KEY"
-                    ]: "Request data is not JSON"
-                }
-            ),
-            400,
-        )
+        raise UnsupportedMediaType("Request data is not JSON")
 
     username = data.get("username", None)
     password = data.get("password", None)
     full_name = data.get("full_name", None)
 
     if not (username and password):
-        return (
-            jsonify(
-                {
-                    current_app.config[
-                        "API_RESPONSE_MESSAGE_KEY"
-                    ]: "Username and/or password is not provided"
-                }
-            ),
-            400,
-        )
+        raise BadRequest("Username and/or password is not provided")
 
     if User.find_by_username(username):
-        return {
-            current_app.config[
-                "API_RESPONSE_MESSAGE_KEY"
-            ]: "A user with that username already exists"
-        }, 409
+        raise UnprocessableEntity("A user with that username already exists")
 
     user = User(
         username=username,
@@ -63,42 +42,19 @@ def login():
     data = request.get_json()
 
     if not data:
-        return (
-            jsonify(
-                {
-                    current_app.config[
-                        "API_RESPONSE_MESSAGE_KEY"
-                    ]: "Request data is not JSON"
-                }
-            ),
-            400,
-        )
+        raise UnsupportedMediaType("Request data is not JSON")
 
     username = data.get("username", None)
     password = data.get("password", None)
 
     if not (username and password):
-        return (
-            jsonify(
-                {
-                    current_app.config[
-                        "API_RESPONSE_MESSAGE_KEY"
-                    ]: "Username and/or password is not provided"
-                }
-            ),
-            400,
-        )
+        raise BadRequest("Username and/or password is not provided")
 
     user = authenticate(username, password)
     if user:
         access_token = create_access_token(identity=user)
         return jsonify(access_token=access_token), 200
-    return (
-        jsonify(
-            {current_app.config["API_RESPONSE_MESSAGE_KEY"]: "Bad username or password"}
-        ),
-        400,
-    )
+    raise BadRequest("Bad username or password")
 
 
 @router.route("/me", methods=["GET"])

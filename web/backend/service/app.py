@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-from flask import Flask, current_app, jsonify
+from flask import Flask, current_app
 
 
 def create_app(test_config: Optional[dict] = None) -> Flask:
