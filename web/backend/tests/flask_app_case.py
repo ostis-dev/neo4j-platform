@@ -3,14 +3,14 @@ import tempfile
 import unittest
 from datetime import timedelta
 
-from service.app import create_app
+from service.app import App
 
 
 class FlaskAppTestCase(unittest.TestCase):
     def setUp(self):
         self.db_fd, self.db_path = tempfile.mkstemp()
 
-        app = create_app(
+        app = App(
             {
                 "TESTING": True,
                 "SQLALCHEMY_DATABASE_URI": f"sqlite:///{self.db_path}",
