@@ -2,6 +2,8 @@
 secret = <random generated value>
 host = 127.0.0.1
 port = 5000
+jwt_expiration_time = <expiration time in minutes>
+api_response_message_key = message
 
 [sc]
 config = ../../db/config.ini
