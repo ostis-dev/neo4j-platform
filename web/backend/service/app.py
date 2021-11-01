@@ -4,8 +4,6 @@ from flask import Flask, current_app, json, redirect
 
 
 class App:
-    _config = None
-
     def __init__(self, test_config: Optional[dict] = None):
         self._app = Flask(__name__, static_folder="staticfiles")
         self._configure_app(test_config)

@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token, current_user, jwt_required
-from werkzeug.exceptions import BadRequest, UnprocessableEntity, UnsupportedMediaType
+from werkzeug.exceptions import BadRequest, UnprocessableEntity
 from werkzeug.security import generate_password_hash
 
+from .helpers import accepts_json_only
 from ..models.user import User
 from ..security import authenticate
 
@@ -10,15 +11,11 @@ router = Blueprint("auth", __name__)
 
 
 @router.route("/register", methods=["POST"])
+@accepts_json_only
 def register():
-    data = request.get_json()
-
-    if not data:
-        raise UnsupportedMediaType("Request data is not JSON")
-
-    username = data.get("username", None)
-    password = data.get("password", None)
-    full_name = data.get("full_name", None)
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
+    full_name = request.json.get("full_name", None)
 
     if not (username and password):
         raise BadRequest("Username and/or password is not provided")
@@ -38,14 +35,10 @@ def register():
 
 
 @router.route("/login", methods=["POST"])
+@accepts_json_only
 def login():
-    data = request.get_json()
-
-    if not data:
-        raise UnsupportedMediaType("Request data is not JSON")
-
-    username = data.get("username", None)
-    password = data.get("password", None)
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
 
     if not (username and password):
         raise BadRequest("Username and/or password is not provided")
