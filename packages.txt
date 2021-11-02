@@ -1,4 +1,8 @@
 Jinja2
 neo4j
 termcolor
-tornado
+Flask
+Flask-JWT-Extended
+Flask-SQLAlchemy
+Flask-Cors
+Flask-Swagger-UI
