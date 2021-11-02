@@ -1,5 +1,5 @@
 from sc.core.element import Element
-from sc.core.keynodes import Keynodes
+from sc.core.keynodes import KeynodeNames
 from sc.core.keywords import Labels, TypeAttrs
 from sc.core.transaction.utils import _parse_output_element, _get_label_from_type
 
@@ -32,7 +32,7 @@ class TransactionNamesWrite:
 
     def __init__(self,
                  driver: neo4j.Driver,
-                 nrel_sys_idtf: str = Keynodes.NREL_SYS_IDTF) -> None:
+                 nrel_sys_idtf: str = KeynodeNames.NREL_SYS_IDTF) -> None:
         self._driver = driver
         self._sys_idtfs = set()
         self._tasks = []
@@ -58,7 +58,7 @@ class TransactionNamesWrite:
         return len(self._sys_idtfs) == 0
 
     def _make_query(self) -> str:
-        query = (f"MATCH (l:{Labels.SC_LINK} {{content: '{Keynodes.NREL_SYS_IDTF}', {_const_attr()} }})"
+        query = (f"MATCH (l:{Labels.SC_LINK} {{content: '{KeynodeNames.NREL_SYS_IDTF}', {_const_attr()} }})"
                  f"<-[__idtf_edge:{Labels.SC_ARC} {{ {TypeAttrs.CONST}: 'CONST' }}]"
                  f"-(__sys_idtf:{Labels.SC_NODE}), \n"
                  f"(:{Labels.SC_EDGE_SOCK} {{edge_id: id(__idtf_edge)}})"
@@ -136,7 +136,7 @@ class TransactionNamesRead:
 
     def __init__(self,
                  driver: neo4j.Driver,
-                 nrel_sys_idtf: str = Keynodes.NREL_SYS_IDTF) -> None:
+                 nrel_sys_idtf: str = KeynodeNames.NREL_SYS_IDTF) -> None:
         self._driver = driver
         self._sys_idtfs = set()
 
@@ -161,7 +161,7 @@ class TransactionNamesRead:
 
     def _make_query(self) -> str:
 
-        query = (f"MATCH (l:{Labels.SC_LINK} {{ content: '{Keynodes.NREL_SYS_IDTF}', {_const_attr()} }})"
+        query = (f"MATCH (l:{Labels.SC_LINK} {{ content: '{KeynodeNames.NREL_SYS_IDTF}', {_const_attr()} }})"
                  f"<-[edge:{Labels.SC_ARC} {{ {_const_attr()} }}]"
                  f"-(__sys_idtf:{Labels.SC_NODE}), \n"
                  f"(edge_sock:{Labels.SC_EDGE_SOCK} {{edge_id: id(edge)}})"

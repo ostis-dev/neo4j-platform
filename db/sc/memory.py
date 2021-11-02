@@ -3,6 +3,7 @@ from sc.core.config import Config
 from sc.core.transaction import TransactionWrite, TransactionRead, TransactionNamesWrite, TransactionNamesRead
 
 import neo4j
+import logging
 
 
 class Memory:
@@ -10,14 +11,14 @@ class Memory:
     def __init__(self, config_path: str):
         self._config = Config(config_path)
 
-        print(f"Connecting to {self._config.db_uri()}")
+        logging.info(f"Connecting to {self._config.db_uri()}")
         self._client = Client(
             self._config.db_uri(),
             self._config.db_user(),
             self._config.db_password())
 
     def close(self):
-        print(f"Close connection to {self._config.db_uri()}")
+        logging.info(f"Close connection to {self._config.db_uri()}")
         self._client.close()
 
     @property

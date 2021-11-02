@@ -127,4 +127,10 @@ dmypy.json
 .pyre/
 
 .DS_Store
-config.ini
+
+*.ini
+
+.antlr
+antlr*.jar
+
+*.code-workspace

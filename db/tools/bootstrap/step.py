@@ -2,7 +2,7 @@ import jinja2
 import neo4j
 
 from sc.core.keywords import Labels, TypeAttrs
-from sc.core.keynodes import Keynodes
+from sc.core.keynodes import KeynodeNames
 from sc.core.config import Config
 
 from typing import Union
@@ -31,7 +31,7 @@ class Step:
             return result
 
         return templ.render(
-            Keynodes=Keynodes,
+            KeynodeNames=KeynodeNames,
             Labels=Labels,
             TypeConst=wrap_enum(TypeConst),
             TypeNodeStruct=wrap_enum(TypeNodeStruct),
