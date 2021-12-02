@@ -1,9 +1,19 @@
 export interface User {
-    name: string,
-    icon: string,
+    id: string,
+    firstName: string,
+    lastName: string,
+    login: string,
+    password: string,
+    online: boolean,
+    access_token: string,
 }
 
 export const _initUser: User = {
-    name: null,
-    icon: null
+    id: '',
+    firstName: '',
+    lastName: '',
+    login: '',
+    password: '',
+    online: false,
+    access_token: null,
 }
